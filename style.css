@@ -859,7 +859,7 @@ textarea {
   border: 1px solid var(--line);
   background: var(--post-tint);
   padding: 4px 6px;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .thread-card-link {
@@ -1279,19 +1279,35 @@ input[type="range"] {
 
 .post-menu {
   position: absolute;
-  top: 100%;
+  bottom: 100%;
+  top: auto;
   right: 0;
   min-width: 74px;
-  margin-top: 4px;
+  margin-bottom: 6px;
   padding: 4px 6px;
   border: 1px solid var(--line);
   background: var(--panel-2);
   box-shadow: inset 0 1px 0 var(--panel-edge);
-  z-index: 5;
+  z-index: 12;
+  transform-origin: bottom right;
+  transition: transform 160ms ease, opacity 160ms ease;
 }
 
 .post-menu .reply-inline-button {
   color: var(--link);
+  transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease;
+}
+
+.post-menu .reply-inline-button:active {
+  transform: translateY(1px) scale(0.98);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--line) 65%, transparent);
+}
+
+.post-menu.hidden {
+  display: block;
+  opacity: 0;
+  transform: translateY(6px) scale(0.98);
+  pointer-events: none;
 }
 
 @media (max-width: 860px) {
