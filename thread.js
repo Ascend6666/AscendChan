@@ -178,6 +178,23 @@ function adminDeleteMarkup(postId, isOp) {
   return `<button class="reply-inline-button danger-button" type="button" data-admin-delete="${postId}" data-admin-delete-op="${isOp ? "true" : "false"}">${label}</button>`;
 }
 
+function formatAsGreentext(text) {
+  return text
+    .replace(/\r\n/g, "\n")
+    .split("\n")
+    .map((line) => (line.trim() ? `> ${line}` : ">"))
+    .join("\n");
+}
+
+function createQuoteButton() {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "quote-float";
+  button.textContent = "Quote";
+  document.body.appendChild(button);
+  return button;
+}
+
 async function renderThreadPage() {
   const { board, thread } = getParams();
   const threadData = await window.AscendApi.getThread(board, thread);
@@ -440,3 +457,66 @@ window.addEventListener("beforeunload", () => {
     window.clearInterval(pollTimer);
   }
 });
+
+const quoteButton = createQuoteButton();
+let activeSelectionText = "";
+
+function hideQuoteButton() {
+  quoteButton.classList.remove("is-visible");
+  activeSelectionText = "";
+}
+
+function showQuoteButton(rect, text) {
+  activeSelectionText = text;
+  const padding = 8;
+  const left = Math.min(rect.left, rect.right) + rect.width / 2;
+  const top = Math.max(8, rect.top - 34);
+  quoteButton.style.left = `${Math.max(padding, Math.min(left, window.innerWidth - padding))}px`;
+  quoteButton.style.top = `${top}px`;
+  quoteButton.style.transform = "translateX(-50%) translateY(0) scale(1)";
+  quoteButton.classList.add("is-visible");
+}
+
+function isSelectionInsideThread(selection) {
+  if (!selection || selection.rangeCount === 0) return false;
+  const range = selection.getRangeAt(0);
+  const container = range.commonAncestorContainer;
+  return threadPagePanel.contains(container.nodeType === 1 ? container : container.parentNode);
+}
+
+document.addEventListener("selectionchange", () => {
+  const selection = window.getSelection();
+  if (!selection || selection.isCollapsed) {
+    hideQuoteButton();
+    return;
+  }
+  if (!isSelectionInsideThread(selection)) {
+    hideQuoteButton();
+    return;
+  }
+  const text = selection.toString().trim();
+  if (!text) {
+    hideQuoteButton();
+    return;
+  }
+  const rect = selection.getRangeAt(0).getBoundingClientRect();
+  showQuoteButton(rect, text);
+});
+
+quoteButton.addEventListener("click", () => {
+  if (!activeSelectionText) return;
+  replyBody.focus();
+  const formatted = `${formatAsGreentext(activeSelectionText)}\n`;
+  replyBody.value = replyBody.value
+    ? `${replyBody.value.replace(/\s+$/, "")}\n${formatted}`
+    : formatted;
+  replyBody.setSelectionRange(replyBody.value.length, replyBody.value.length);
+  hideQuoteButton();
+  window.getSelection()?.removeAllRanges();
+});
+
+document.addEventListener("scroll", () => {
+  if (quoteButton.classList.contains("is-visible")) {
+    hideQuoteButton();
+  }
+}, true);
