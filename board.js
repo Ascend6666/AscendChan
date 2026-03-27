@@ -354,8 +354,3 @@ window.addEventListener("beforeunload", () => {
     window.AscendSupabase.removeChannel(realtimeChannel);
   }
 });
-
-const manualRefreshButton = document.getElementById("manualRefreshButton");
-if (manualRefreshButton) {
-  manualRefreshButton.addEventListener("click", () => scheduleRefresh(0));
-}
