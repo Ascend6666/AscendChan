@@ -130,7 +130,7 @@ function renderPostBody(text) {
       return `<a class="quote-link" href="${href}" target="_blank" rel="noopener noreferrer">${url}</a>`;
     });
     const withQuotes = withLinks.replace(/&gt;&gt;(\d{3})/g, '<a class="quote-link" href="#p-$1">&gt;&gt;$1</a>');
-    if (line.startsWith(">") && !line.startsWith(">>")) return `<span class="greentext">${withQuotes}</span>`;
+    if (line.startsWith("&gt;") && !line.startsWith("&gt;&gt;")) return `<span class="greentext">${withQuotes}</span>`;
     return withQuotes;
   }).join("<br>");
 }
