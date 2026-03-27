@@ -1,5 +1,9 @@
 const supabase = window.AscendSupabase;
 
+if (!supabase) {
+  throw new Error("Supabase client is not initialized. Check CDN load or network.");
+}
+
 async function fetchThreadRow(board, threadNumber) {
   const { data, error } = await supabase
     .from("threads")

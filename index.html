@@ -294,7 +294,12 @@ fake invite</textarea>
       </div>
     </aside>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" onerror="window.__supabaseCdnFailed=true;"></script>
+    <script>
+      if (window.__supabaseCdnFailed) {
+        document.write('<script src="https://unpkg.com/@supabase/supabase-js@2"><\/script>');
+      }
+    </script>
     <script src="supabase.js"></script>
     <script src="supabase-api.js"></script>
     <script src="reset.js"></script>
