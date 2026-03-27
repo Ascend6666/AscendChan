@@ -133,6 +133,32 @@
       return nextPostNumber;
     },
 
+    async deletePost(board, threadNumber, postNumber) {
+      const thread = await fetchThreadRow(board, threadNumber);
+      if (!thread) throw new Error("Thread not found");
+
+      const targetPostNumber = Number(postNumber);
+      if (!Number.isFinite(targetPostNumber)) throw new Error("Invalid post number");
+
+      const { error } = await supabase
+        .from("posts")
+        .update({ deleted_at: new Date().toISOString() })
+        .eq("thread_id", thread.id)
+        .eq("post_number", targetPostNumber);
+      if (error) throw error;
+    },
+
+    async deleteThread(board, threadNumber) {
+      const thread = await fetchThreadRow(board, threadNumber);
+      if (!thread) throw new Error("Thread not found");
+
+      const { error } = await supabase
+        .from("threads")
+        .update({ archived: true, updated_at: new Date().toISOString() })
+        .eq("id", thread.id);
+      if (error) throw error;
+    },
+
     async listBookmarks(board) {
       const clientId = window.AscendClient.getClientId();
       const query = supabase

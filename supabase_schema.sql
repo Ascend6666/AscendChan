@@ -182,6 +182,14 @@ for insert
 to anon, authenticated
 with check (true);
 
+drop policy if exists "public can update posts" on public.posts;
+create policy "public can update posts"
+on public.posts
+for update
+to anon, authenticated
+using (true)
+with check (true);
+
 drop policy if exists "public can create reports" on public.reports;
 create policy "public can create reports"
 on public.reports

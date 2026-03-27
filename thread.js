@@ -172,6 +172,12 @@ function postMenuMarkup(postId, posterClientId) {
   `;
 }
 
+function adminDeleteMarkup(postId, isOp) {
+  if (window.AscendClient?.getRole() !== "admin") return "";
+  const label = isOp ? "Delete thread" : "Delete";
+  return `<button class="reply-inline-button danger-button" type="button" data-admin-delete="${postId}" data-admin-delete-op="${isOp ? "true" : "false"}">${label}</button>`;
+}
+
 async function renderThreadPage() {
   const { board, thread } = getParams();
   const threadData = await window.AscendApi.getThread(board, thread);
@@ -199,6 +205,7 @@ async function renderThreadPage() {
           <div class="post-actions">
             ${postMenuMarkup(threadData.opPostId, threadData.poster_client_id)}
             <button class="reply-inline-button" type="button" data-reply-target="${threadData.opPostId}">Reply</button>
+            ${adminDeleteMarkup(threadData.opPostId, true)}
             <span class="post-id">${threadData.opPostId}</span>
           </div>
         </div>
@@ -213,6 +220,7 @@ async function renderThreadPage() {
             <div class="post-actions">
               ${postMenuMarkup(reply.postId, reply.poster_client_id)}
               <button class="reply-inline-button" type="button" data-reply-target="${reply.postId}">Reply</button>
+              ${adminDeleteMarkup(reply.postId, false)}
               <span class="post-id">${reply.postId}</span>
             </div>
           </div>
@@ -394,6 +402,26 @@ document.addEventListener("click", async (event) => {
   const existingText = replyBody.value.replace(/^\s+/, "");
   replyBody.value = `${quotePrefix}${existingText}`;
   replyBody.setSelectionRange(replyBody.value.length, replyBody.value.length);
+});
+
+document.addEventListener("click", async (event) => {
+  const deleteButton = event.target.closest("[data-admin-delete]");
+  if (!deleteButton || !currentThread) return;
+  if (window.AscendClient?.getRole() !== "admin") return;
+
+  const postId = deleteButton.dataset.adminDelete;
+  const isOp = deleteButton.dataset.adminDeleteOp === "true";
+  try {
+    if (isOp) {
+      await window.AscendApi.deleteThread(getParams().board, currentThread.thread_number);
+      window.location.href = `board.html?board=${getParams().board}`;
+      return;
+    }
+    await window.AscendApi.deletePost(getParams().board, currentThread.thread_number, postId);
+    await renderThreadPage();
+  } catch (error) {
+    alert(error.message || "Could not delete post.");
+  }
 });
 
 applyPreferences(draftPrefs);
