@@ -54,7 +54,6 @@ let currentThreads = [];
 const currentBoard = getCurrentBoard();
 let realtimeChannel = null;
 let refreshTimer = null;
-let pollTimer = null;
 
 function getCurrentBoard() {
   const params = new URLSearchParams(window.location.search);
@@ -249,32 +248,8 @@ function scheduleRefresh(delay = 200) {
   }, delay);
 }
 
-function setupRealtime() {
-  if (!window.AscendSupabase?.channel) return;
-  if (realtimeChannel) {
-    window.AscendSupabase.removeChannel(realtimeChannel);
-  }
-  realtimeChannel = window.AscendSupabase
-    .channel(`board-${currentBoard}`)
-    .on(
-      "postgres_changes",
-      { event: "*", schema: "public", table: "threads", filter: `board_key=eq.${currentBoard}` },
-      () => scheduleRefresh(),
-    )
-    .on(
-      "postgres_changes",
-      { event: "*", schema: "public", table: "posts", filter: `board_key=eq.${currentBoard}` },
-      () => scheduleRefresh(),
-    )
-    .subscribe();
-}
-
-function setupPolling(intervalMs = 8000) {
-  if (pollTimer) return;
-  pollTimer = window.setInterval(() => {
-    scheduleRefresh(0);
-  }, intervalMs);
-}
+function setupRealtime() {}
+function setupPolling() {}
 
 function renderBoardMeta() {
   const board = boardMeta[currentBoard];
@@ -370,8 +345,6 @@ document.addEventListener("click", async (event) => {
 applyPreferences(draftPrefs);
 renderBoardMeta();
 syncViewMode();
-setupRealtime();
-setupPolling();
 refreshBoard().catch(() => {
   threadList.innerHTML = '<p class="empty-state">Could not load threads.</p>';
 });
@@ -380,7 +353,9 @@ window.addEventListener("beforeunload", () => {
   if (realtimeChannel) {
     window.AscendSupabase.removeChannel(realtimeChannel);
   }
-  if (pollTimer) {
-    window.clearInterval(pollTimer);
-  }
 });
+
+const manualRefreshButton = document.getElementById("manualRefreshButton");
+if (manualRefreshButton) {
+  manualRefreshButton.addEventListener("click", () => scheduleRefresh(0));
+}

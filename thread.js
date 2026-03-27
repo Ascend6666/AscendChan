@@ -32,7 +32,6 @@ let currentThread = null;
 let realtimeChannel = null;
 let realtimeThreadId = null;
 let refreshTimer = null;
-let pollTimer = null;
 
 function loadPreferences() {
   return {
@@ -261,34 +260,8 @@ function scheduleRefresh(delay = 200) {
   }, delay);
 }
 
-function setupThreadRealtime(threadData) {
-  if (!window.AscendSupabase?.channel || !threadData?.id) return;
-  if (realtimeChannel && realtimeThreadId === threadData.id) return;
-  if (realtimeChannel) {
-    window.AscendSupabase.removeChannel(realtimeChannel);
-  }
-  realtimeThreadId = threadData.id;
-  realtimeChannel = window.AscendSupabase
-    .channel(`thread-${threadData.id}`)
-    .on(
-      "postgres_changes",
-      { event: "*", schema: "public", table: "posts", filter: `thread_id=eq.${threadData.id}` },
-      () => scheduleRefresh(),
-    )
-    .on(
-      "postgres_changes",
-      { event: "*", schema: "public", table: "threads", filter: `id=eq.${threadData.id}` },
-      () => scheduleRefresh(),
-    )
-    .subscribe();
-}
-
-function setupPolling(intervalMs = 8000) {
-  if (pollTimer) return;
-  pollTimer = window.setInterval(() => {
-    scheduleRefresh(0);
-  }, intervalMs);
-}
+function setupThreadRealtime() {}
+function setupPolling() {}
 
 async function createReply() {
   const text = replyBody.value.trim();
@@ -401,6 +374,7 @@ document.addEventListener("click", async (event) => {
   if (reportTarget && currentThread) {
     try {
       await window.AscendApi.createReport(getParams().board, currentThread.thread_number, reportTarget.dataset.reportPost, reportTarget.dataset.targetClient || null);
+      alert("Reported successfully. Now take a chill pill.");
     } catch {
       alert("Could not send report.");
     }
@@ -447,16 +421,17 @@ renderThreadPage().catch(() => {
   threadPagePanel.innerHTML = '<p class="empty-state">Could not load thread.</p>';
 });
 window.setInterval(syncCooldownUi, 1000);
-setupPolling();
 
 window.addEventListener("beforeunload", () => {
   if (realtimeChannel) {
     window.AscendSupabase.removeChannel(realtimeChannel);
   }
-  if (pollTimer) {
-    window.clearInterval(pollTimer);
-  }
 });
+
+const manualRefreshButton = document.getElementById("manualRefreshButton");
+if (manualRefreshButton) {
+  manualRefreshButton.addEventListener("click", () => scheduleRefresh(0));
+}
 
 const quoteButton = createQuoteButton();
 let activeSelectionText = "";
