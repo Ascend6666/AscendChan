@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Ascend Chan Thread</title>
+    <title>Ascend Chan Board</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body data-theme="classic-olive" data-font="tahoma">
@@ -20,43 +20,101 @@
               <span class="crosshair-corner corner-bottom-right"></span>
               <span class="crosshair-center"></span>
             </span>
-            <h1 id="threadPageBoard" class="board-page-title">/mind/</h1>
+            <h1 id="boardTitle" class="board-page-title">/mind/</h1>
           </div>
         </div>
 
         <div class="toolbar">
           <a class="utility-button" href="index.html">Home</a>
-          <a class="utility-button" id="backToBoard" href="board.html?board=mind">Board</a>
-          <button class="utility-button" type="button" id="bookmarkToggle">Bookmark</button>
           <button class="utility-button" type="button" id="customizeToggle">
             Customize
           </button>
         </div>
       </header>
 
-      <div class="site-subnav" aria-label="Thread links">
+      <div class="site-subnav" aria-label="Board links">
         <a href="index.html">index</a>
         <span>/</span>
-        <a id="subnavBoardLink" href="board.html?board=mind">board</a>
-        <span>/</span>
         <a href="rules.html">rules</a>
+        <span>/</span>
+        <a href="#catalogPanel">catalog</a>
+        <span>/</span>
+        <a href="#bookmarkPanel">bookmarks</a>
+        <span>/</span>
+        <a href="#threadComposer">new thread</a>
       </div>
 
-      <section class="thread-page-panel" id="threadPagePanel"></section>
+      <section class="board-hero">
+        <div class="board-meta-card">
+          <p class="board-code" id="boardCode">/mind/</p>
+          <p class="board-description" id="boardDescription">
+            Philosophy, psychology, mental models, and whatever else keeps you awake.
+          </p>
+        </div>
+      </section>
 
-      <section class="thread-composer">
-        <div class="section-title">Reply</div>
+      <section class="utility-strip board-tools" aria-label="Board tools">
+        <div class="board-tool-grid">
+          <label class="search-wrap board-search-wrap" for="threadSearch">
+            <span class="visually-hidden">Search threads</span>
+            <input id="threadSearch" type="search" placeholder="search threads" />
+          </label>
+
+          <label class="select-wrap board-select-wrap" for="threadFilter">
+            <span>Filter</span>
+            <select id="threadFilter">
+              <option value="all">All threads</option>
+              <option value="active">Most active</option>
+              <option value="new">Newest</option>
+              <option value="unanswered">Unanswered</option>
+            </select>
+          </label>
+
+          <button class="utility-button primary-button" type="button" id="toggleComposer">
+            New thread
+          </button>
+        </div>
+        <div class="board-view-toggles">
+          <button class="utility-button" type="button" id="listViewButton">List</button>
+          <button class="utility-button" type="button" id="catalogViewButton">Catalog</button>
+        </div>
+      </section>
+
+      <section class="thread-composer hidden" id="threadComposer">
+        <div class="section-title">Start new thread</div>
         <div class="composer-grid">
-          <p class="empty-state hidden" id="cooldownNotice"></p>
-          <label class="select-wrap" for="replyBody">
+          <label class="select-wrap" for="threadSubject">
+            <span>Subject</span>
+            <input id="threadSubject" type="text" placeholder="thread title" />
+          </label>
+          <label class="select-wrap" for="threadBody">
             <span>Post</span>
-            <textarea id="replyBody" rows="6" placeholder="write a reply"></textarea>
+            <textarea id="threadBody" rows="6" placeholder="type your post here"></textarea>
           </label>
           <div class="composer-actions">
-            <button class="utility-button primary-button" type="button" id="postReplyButton">
-              Post reply
+            <button class="utility-button primary-button" type="button" id="postThreadButton">
+              Post thread
             </button>
           </div>
+        </div>
+      </section>
+
+      <section class="thread-list-panel" id="bookmarkPanel">
+        <div class="section-title">Bookmarks</div>
+        <div class="thread-list" id="bookmarkThreads">
+          <p class="empty-state">No bookmarks on this board.</p>
+        </div>
+      </section>
+
+      <section class="thread-list-panel">
+        <div class="section-title">Threads</div>
+        <div class="thread-list" id="threadList"></div>
+      </section>
+
+      <section class="thread-list-panel hidden" id="catalogPanel">
+        <div class="section-title">Catalog</div>
+        <div class="catalog-grid" id="catalogGrid">
+          <p class="empty-state">No threads yet.</p>
         </div>
       </section>
     </main>
@@ -159,6 +217,6 @@
     <script src="supabase.js"></script>
     <script src="supabase-api.js"></script>
     <script src="reset.js"></script>
-    <script src="thread.js"></script>
+    <script src="board.js"></script>
   </body>
 </html>
