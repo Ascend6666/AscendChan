@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ascend Chan Admin</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body data-theme="classic-olive" data-font="tahoma">
+    <main class="page board-page">
+      <header class="topbar board-topbar">
+        <div class="brand-block board-brand">
+          <div class="brand-lockup board-lockup">
+            <span class="site-logo" aria-hidden="true">
+              <span class="crosshair-vert crosshair-long"></span>
+              <span class="crosshair-horz crosshair-long"></span>
+              <span class="crosshair-corner corner-top-left"></span>
+              <span class="crosshair-corner corner-top-right"></span>
+              <span class="crosshair-corner corner-bottom-left"></span>
+              <span class="crosshair-corner corner-bottom-right"></span>
+              <span class="crosshair-center"></span>
+            </span>
+            <h1 class="board-page-title">Admin</h1>
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <a class="utility-button" href="index.html">Home</a>
+          <button class="utility-button" type="button" id="customizeToggle">Customize</button>
+          <button class="utility-button" type="button" id="adminLogoutButton">Logout</button>
+        </div>
+      </header>
+
+      <div class="site-subnav" aria-label="Admin links">
+        <a href="#adminReports">reports</a>
+        <span>/</span>
+        <a href="#adminThreadTools">threads</a>
+        <span>/</span>
+        <a href="#adminBanTools">bans</a>
+      </div>
+
+      <section class="thread-list-panel">
+        <div class="section-title">Overview</div>
+        <div class="composer-grid">
+          <p class="empty-state hidden" id="adminActionNotice"></p>
+        </div>
+        <div class="admin-overview-grid" id="adminOverview">
+          <div class="report-item"><strong id="overviewThreads">0</strong><span>threads</span></div>
+          <div class="report-item"><strong id="overviewPosts">0</strong><span>posts</span></div>
+          <div class="report-item"><strong id="overviewReports">0</strong><span>reports</span></div>
+          <div class="report-item"><strong id="overviewBans">0</strong><span>active bans</span></div>
+        </div>
+      </section>
+
+      <div class="dashboard-grid admin-grid">
+        <section class="dashboard-card" id="adminReports">
+          <h3>Report queue</h3>
+          <div class="dashboard-list" id="adminReportQueue">
+            <p class="empty-state">No reports yet.</p>
+          </div>
+          <div class="button-stack">
+            <button class="utility-button" type="button" id="clearAllReportsButton">Clear all reports</button>
+          </div>
+        </section>
+
+        <section class="dashboard-card" id="adminThreadTools">
+          <h3>Thread and post tools</h3>
+          <label class="select-wrap" for="adminBoardSelect">
+            <span>Board</span>
+            <select id="adminBoardSelect">
+              <option value="mind">/mind/</option>
+              <option value="body">/body/</option>
+              <option value="study">/study/</option>
+              <option value="skill">/skill/</option>
+              <option value="grind">/grind/</option>
+              <option value="social">/social/</option>
+              <option value="tech">/tech/</option>
+              <option value="exam">/exam/</option>
+              <option value="meta">/meta/</option>
+            </select>
+          </label>
+          <label class="select-wrap" for="adminThreadSelect">
+            <span>Thread</span>
+            <select id="adminThreadSelect"></select>
+          </label>
+          <label class="select-wrap" for="adminPostSelect">
+            <span>Post</span>
+            <select id="adminPostSelect"></select>
+          </label>
+          <p class="empty-state" id="adminThreadState">No thread selected.</p>
+          <div class="button-stack">
+            <button class="utility-button" type="button" id="adminPinThreadButton">Pin / unpin thread</button>
+            <button class="utility-button" type="button" id="adminLockThreadButton">Lock / unlock thread</button>
+            <button class="utility-button" type="button" id="adminArchiveThreadButton">Archive / unarchive thread</button>
+            <button class="utility-button danger-button" type="button" id="adminDeletePostButton">Delete selected post</button>
+            <button class="utility-button danger-button" type="button" id="adminDeleteThreadButton">Delete selected thread</button>
+          </div>
+        </section>
+
+        <section class="dashboard-card" id="adminBanTools">
+          <h3>Poster bans</h3>
+          <label class="select-wrap" for="banTargetInput">
+            <span>Poster / client ID</span>
+            <input id="banTargetInput" type="text" placeholder="CID-XXXXXX" />
+          </label>
+          <label class="select-wrap" for="tempBanMinutes">
+            <span>Temp ban minutes</span>
+            <input id="tempBanMinutes" type="number" min="1" step="1" value="60" />
+          </label>
+          <div class="button-stack">
+            <button class="utility-button" type="button" id="tempBanButton">Apply temp ban</button>
+            <button class="utility-button danger-button" type="button" id="permaBanButton">Apply permanent ban</button>
+            <button class="utility-button" type="button" id="unbanButton">Remove ban</button>
+          </div>
+          <div class="dashboard-list" id="banList">
+            <p class="empty-state">No active bans.</p>
+          </div>
+        </section>
+
+        <section class="dashboard-card">
+          <h3>Note</h3>
+          <p id="adminNote">
+            This static version can moderate local poster IDs, not real IP addresses. Real IP moderation needs a backend.
+          </p>
+        </section>
+      </div>
+    </main>
+
+    <aside class="panel hidden" id="customizePanel" aria-labelledby="customizeTitle">
+      <div class="panel-header">
+        <div>
+          <h2 id="customizeTitle">Customize</h2>
+          <p>Theme and font.</p>
+        </div>
+        <button class="close-button" type="button" data-close-panel="customizePanel">x</button>
+      </div>
+
+      <section class="panel-section">
+        <h3>Themes</h3>
+        <div class="theme-grid" id="themeGrid">
+          <button class="theme-card" type="button" data-theme-option="classic-olive"><span class="theme-swatch theme-classic"></span><strong>Classic Olive</strong></button>
+          <button class="theme-card" type="button" data-theme-option="amber-noir"><span class="theme-swatch theme-amber"></span><strong>Amber Noir</strong></button>
+          <button class="theme-card" type="button" data-theme-option="mist-blue"><span class="theme-swatch theme-blue"></span><strong>Mist Blue</strong></button>
+          <button class="theme-card" type="button" data-theme-option="blush-pink"><span class="theme-swatch theme-pink"></span><strong>Blush Pink</strong></button>
+          <button class="theme-card" type="button" data-theme-option="violet-haze"><span class="theme-swatch theme-violet"></span><strong>Violet Haze</strong></button>
+          <button class="theme-card" type="button" data-theme-option="minimal-dark"><span class="theme-swatch theme-dark"></span><strong>Minimal Dark</strong></button>
+          <button class="theme-card" type="button" data-theme-option="retro-terminal"><span class="theme-swatch theme-retro"></span><strong>Retro Terminal</strong></button>
+        </div>
+      </section>
+
+      <section class="panel-section">
+        <h3>Font</h3>
+        <label class="select-wrap" for="fontSelect">
+          <span>Choose font</span>
+          <select id="fontSelect">
+            <option value="tahoma">Tahoma</option>
+            <option value="verdana">Verdana</option>
+            <option value="arial">Arial</option>
+            <option value="trebuchet">Trebuchet MS</option>
+            <option value="georgia">Georgia</option>
+            <option value="courier">Courier New</option>
+            <option value="jetbrains">JetBrainsMono Nerd Font</option>
+            <option value="fira">FiraCode Nerd Font</option>
+            <option value="iosevka">Iosevka Nerd Font</option>
+            <option value="hack">Hack Nerd Font</option>
+            <option value="cascadia">CaskaydiaCove Nerd Font</option>
+            <option value="sauce">SauceCodePro Nerd Font</option>
+            <option value="ubuntu">UbuntuMono Nerd Font</option>
+          </select>
+        </label>
+        <label class="select-wrap" for="fontSizeRange">
+          <span>Text size: <strong id="fontSizeValue">100%</strong></span>
+          <input id="fontSizeRange" type="range" min="85" max="130" step="5" value="100" />
+        </label>
+        <div class="mode-grid">
+          <button class="theme-card mode-card" type="button" data-font-weight="regular"><strong>Regular</strong></button>
+          <button class="theme-card mode-card" type="button" data-font-weight="bold"><strong>Bold</strong></button>
+          <button class="theme-card mode-card" type="button" data-font-weight="heavy"><strong>Heavy Bold</strong></button>
+        </div>
+      </section>
+
+      <div class="panel-actions">
+        <button class="utility-button primary-button" type="button" id="savePreferences">Save preferences</button>
+        <button class="utility-button" type="button" id="resetPreferences">Reset</button>
+      </div>
+    </aside>
+
+    <script src="reset.js"></script>
+    <script src="admin.js"></script>
+  </body>
+</html>

@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ascend Chan</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body data-theme="classic-olive" data-font="tahoma">
+    <main class="page">
+      <header class="topbar">
+        <div class="brand-block">
+          <div class="brand-lockup">
+            <span class="site-logo" aria-hidden="true">
+              <span class="crosshair-vert crosshair-long"></span>
+              <span class="crosshair-horz crosshair-long"></span>
+              <span class="crosshair-corner corner-top-left"></span>
+              <span class="crosshair-corner corner-top-right"></span>
+              <span class="crosshair-corner corner-bottom-left"></span>
+              <span class="crosshair-corner corner-bottom-right"></span>
+              <span class="crosshair-center"></span>
+            </span>
+            <h1 class="site-title">Ascend<br />Chan</h1>
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <button class="utility-button" type="button" id="customizeToggle">
+            Customize
+          </button>
+          <button class="utility-button" type="button" id="loginToggle">
+            Login
+          </button>
+        </div>
+      </header>
+
+      <div class="site-subnav" aria-label="Site links">
+        <a href="#bookmarkList">bookmarks</a>
+        <span>/</span>
+        <a href="rules.html">rules</a>
+      </div>
+
+      <div class="layout">
+        <section class="sidebar" aria-label="Board list">
+          <div class="section-title">Boards</div>
+          <nav class="board-list" id="boardList">
+            <button class="board-row" type="button" data-board="mind">/mind/</button>
+            <button class="board-row" type="button" data-board="body">/body/</button>
+            <button class="board-row" type="button" data-board="study">/study/</button>
+            <button class="board-row" type="button" data-board="skill">/skill/</button>
+            <button class="board-row" type="button" data-board="grind">/grind/</button>
+            <button class="board-row" type="button" data-board="social">/social/</button>
+            <button class="board-row" type="button" data-board="tech">/tech/</button>
+            <button class="board-row" type="button" data-board="exam">/exam/</button>
+            <button class="board-row" type="button" data-board="meta">/meta/</button>
+          </nav>
+        </section>
+
+        <div class="right-column">
+          <section class="sidebar" aria-label="Bookmarked threads">
+            <button class="section-button" type="button" id="bookmarksToggle">Bookmarked threads</button>
+            <div class="bookmark-list hidden" id="bookmarkList">
+              <p class="empty-state">No bookmarked threads.</p>
+            </div>
+          </section>
+
+          <section class="sidebar" aria-label="Recent activity">
+            <div class="section-title">Recent activity</div>
+            <div class="recent-list" id="recentList">
+              <p class="empty-state">No Recent Activity :(</p>
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+
+    <aside class="panel hidden" id="customizePanel" aria-labelledby="customizeTitle">
+      <div class="panel-header">
+        <div>
+          <h2 id="customizeTitle">Customize</h2>
+          <p>Theme and font.</p>
+        </div>
+        <button class="close-button" type="button" data-close-panel="customizePanel">
+          x
+        </button>
+      </div>
+
+      <section class="panel-section">
+        <h3>Themes</h3>
+        <div class="theme-grid" id="themeGrid">
+          <button class="theme-card" type="button" data-theme-option="classic-olive">
+            <span class="theme-swatch theme-classic"></span>
+            <strong>Classic Olive</strong>
+          </button>
+          <button class="theme-card" type="button" data-theme-option="amber-noir">
+            <span class="theme-swatch theme-amber"></span>
+            <strong>Amber Noir</strong>
+          </button>
+          <button class="theme-card" type="button" data-theme-option="mist-blue">
+            <span class="theme-swatch theme-blue"></span>
+            <strong>Mist Blue</strong>
+          </button>
+          <button class="theme-card" type="button" data-theme-option="blush-pink">
+            <span class="theme-swatch theme-pink"></span>
+            <strong>Blush Pink</strong>
+          </button>
+          <button class="theme-card" type="button" data-theme-option="violet-haze">
+            <span class="theme-swatch theme-violet"></span>
+            <strong>Violet Haze</strong>
+          </button>
+          <button class="theme-card" type="button" data-theme-option="minimal-dark">
+            <span class="theme-swatch theme-dark"></span>
+            <strong>Minimal Dark</strong>
+          </button>
+          <button class="theme-card" type="button" data-theme-option="retro-terminal">
+            <span class="theme-swatch theme-retro"></span>
+            <strong>Retro Terminal</strong>
+          </button>
+        </div>
+      </section>
+
+      <section class="panel-section">
+        <h3>Font</h3>
+        <label class="select-wrap" for="fontSelect">
+          <span>Choose font</span>
+          <select id="fontSelect">
+            <option value="tahoma">Tahoma</option>
+            <option value="verdana">Verdana</option>
+            <option value="arial">Arial</option>
+            <option value="trebuchet">Trebuchet MS</option>
+            <option value="georgia">Georgia</option>
+            <option value="courier">Courier New</option>
+            <option value="jetbrains">JetBrainsMono Nerd Font</option>
+            <option value="fira">FiraCode Nerd Font</option>
+            <option value="iosevka">Iosevka Nerd Font</option>
+            <option value="hack">Hack Nerd Font</option>
+            <option value="cascadia">CaskaydiaCove Nerd Font</option>
+            <option value="sauce">SauceCodePro Nerd Font</option>
+            <option value="ubuntu">UbuntuMono Nerd Font</option>
+          </select>
+        </label>
+
+        <label class="select-wrap" for="fontSizeRange">
+          <span>Text size: <strong id="fontSizeValue">100%</strong></span>
+          <input id="fontSizeRange" type="range" min="85" max="130" step="5" value="100" />
+        </label>
+
+        <div class="mode-grid">
+          <button class="theme-card mode-card" type="button" data-font-weight="regular">
+            <strong>Regular</strong>
+          </button>
+          <button class="theme-card mode-card" type="button" data-font-weight="bold">
+            <strong>Bold</strong>
+          </button>
+          <button class="theme-card mode-card" type="button" data-font-weight="heavy">
+            <strong>Heavy Bold</strong>
+          </button>
+        </div>
+      </section>
+
+      <div class="panel-actions">
+        <button class="utility-button primary-button" type="button" id="savePreferences">
+          Save preferences
+        </button>
+        <button class="utility-button" type="button" id="resetPreferences">
+          Reset
+        </button>
+      </div>
+    </aside>
+
+    <aside class="panel hidden" id="loginPanel" aria-labelledby="loginTitle">
+      <div class="panel-header">
+        <div>
+          <h2 id="loginTitle">Developer / Admin Login</h2>
+          <p>Password only. This area is restricted.</p>
+        </div>
+        <button class="close-button" type="button" data-close-panel="loginPanel">
+          x
+        </button>
+      </div>
+
+      <form class="login-form" id="loginForm">
+        <label class="select-wrap" for="passwordInput">
+          <span>Password</span>
+          <input id="passwordInput" type="password" autocomplete="current-password" />
+        </label>
+        <button class="utility-button primary-button" type="submit">Enter dashboard</button>
+        <p class="login-note" id="loginStatus">
+          Use developer or admin password to unlock moderation tools.
+        </p>
+      </form>
+    </aside>
+
+    <aside class="panel panel-wide hidden" id="dashboardPanel" aria-labelledby="dashboardTitle">
+      <div class="panel-header">
+        <div>
+          <h2 id="dashboardTitle">Admin dashboard</h2>
+          <p id="dashboardRole">role locked</p>
+        </div>
+        <div class="dashboard-actions">
+          <button class="utility-button" type="button" id="logoutButton">Logout</button>
+          <button class="close-button" type="button" data-close-panel="dashboardPanel">
+            x
+          </button>
+        </div>
+      </div>
+
+      <div class="composer-grid">
+        <p class="empty-state hidden" id="dashboardActionNotice"></p>
+      </div>
+
+      <div class="dashboard-grid">
+        <section class="dashboard-card">
+          <h3>Forum state</h3>
+          <label class="toggle-row">
+            <span>Read only mode</span>
+            <input type="checkbox" id="readOnlyToggle" />
+          </label>
+          <label class="toggle-row">
+            <span>Slow mode global</span>
+            <input type="checkbox" id="slowModeToggle" />
+          </label>
+          <label class="toggle-row">
+            <span>Approve new boards manually</span>
+            <input type="checkbox" id="approvalToggle" />
+          </label>
+        </section>
+
+        <section class="dashboard-card">
+          <h3>Moderation queue</h3>
+          <div class="dashboard-list" id="reportQueue">
+            <p class="empty-state">No reports yet.</p>
+          </div>
+        </section>
+
+        <section class="dashboard-card">
+          <h3>Board controls</h3>
+          <label class="select-wrap" for="boardSelect">
+            <span>Target board</span>
+            <select id="boardSelect">
+              <option>/mind/</option>
+              <option>/body/</option>
+              <option>/study/</option>
+              <option>/skill/</option>
+              <option>/grind/</option>
+              <option>/social/</option>
+              <option>/tech/</option>
+              <option>/exam/</option>
+              <option>/meta/</option>
+            </select>
+          </label>
+          <label class="select-wrap" for="threadSelect">
+            <span>Target thread</span>
+            <select id="threadSelect">
+              <option value="">No threads</option>
+            </select>
+          </label>
+          <div class="button-stack">
+            <button class="utility-button" type="button" id="pinThreadButton">Pin selected thread</button>
+            <button class="utility-button" type="button" id="lockThreadButton">Lock or unlock thread</button>
+            <button class="utility-button" type="button" id="archiveThreadButton">Archive selected thread</button>
+          </div>
+        </section>
+
+        <section class="dashboard-card">
+          <h3>Post filters</h3>
+          <label class="select-wrap" for="filterTerms">
+            <span>Blocked terms</span>
+            <textarea id="filterTerms" rows="5">spam link
+casino mirror
+bot drop
+fake invite</textarea>
+          </label>
+        </section>
+
+        <section class="dashboard-card">
+          <h3>System actions</h3>
+          <div class="button-stack">
+            <button class="utility-button" type="button" id="clearReportsButton">Clear resolved reports</button>
+            <button class="utility-button" type="button" id="resetCooldownsButton">Reset spam cooldowns</button>
+            <button class="utility-button" type="button" id="backupThreadsButton">Backup thread index</button>
+            <button class="utility-button danger-button" type="button">
+              Emergency lockdown
+            </button>
+          </div>
+        </section>
+
+        <section class="dashboard-card">
+          <h3>Role powers</h3>
+          <p id="roleDescription">
+            Developer can access tooling and forum controls. Admin gets full moderation and lockdown powers.
+          </p>
+        </section>
+      </div>
+    </aside>
+
+    <script src="reset.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
