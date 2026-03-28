@@ -905,9 +905,16 @@ textarea {
 }
 
 .post-alias {
+  display: inline-flex;
+  align-items: center;
+  min-height: 18px;
+  padding: 1px 6px;
+  border: 1px solid color-mix(in srgb, var(--line) 72%, transparent);
+  background: color-mix(in srgb, var(--panel-2) 55%, transparent);
   color: color-mix(in srgb, var(--header-text) 85%, var(--muted) 15%);
-  font-size: calc(10px * var(--content-font-scale));
+  font-size: calc(9px * var(--content-font-scale));
   letter-spacing: 0.02em;
+  line-height: 1;
 }
 
 .post-actions {
@@ -925,6 +932,13 @@ textarea {
   font-size: calc(9px * var(--content-font-scale));
   line-height: 1;
   display: block;
+}
+
+.post-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
 }
 
 .thread-card h3 {
@@ -1061,13 +1075,19 @@ textarea {
 .stream-messages {
   flex: 1;
   overflow-y: auto;
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 6px;
   padding-right: 4px;
 }
 
 .stream-message strong {
   color: var(--header-text);
+}
+
+.stream-message {
+  display: block;
+  word-break: break-word;
 }
 
 .stream-chat-input {

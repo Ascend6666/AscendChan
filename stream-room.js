@@ -12,6 +12,7 @@ const syncButton = document.getElementById("syncButton");
 let streamData = null;
 let player = null;
 let pollTimer = null;
+let hostHeartbeat = null;
 let lastMessageCount = 0;
 
 function getStreamId() {
@@ -38,9 +39,17 @@ function initPlayer(videoId) {
     videoId,
     playerVars: {
       autoplay: 0,
-      controls: 1,
+      controls: isHost() ? 1 : 0,
       rel: 0,
       modestbranding: 1,
+    },
+    events: {
+      onStateChange: async (event) => {
+        if (!isHost()) return;
+        if (event.data === window.YT.PlayerState.PLAYING || event.data === window.YT.PlayerState.PAUSED) {
+          await broadcastState();
+        }
+      },
     },
   });
 }
@@ -90,9 +99,11 @@ async function refreshState() {
   if (Math.abs(currentTime - Number(state.playback_time || 0)) > 2) {
     player.seekTo(Number(state.playback_time || 0), true);
   }
-  if (state.is_playing) {
+  const playerState = player.getPlayerState();
+  if (state.is_playing && playerState !== window.YT.PlayerState.PLAYING) {
     player.playVideo();
-  } else {
+  }
+  if (!state.is_playing && playerState === window.YT.PlayerState.PLAYING) {
     player.pauseVideo();
   }
 }
@@ -147,6 +158,11 @@ loadStream()
       await refreshMessages();
       await refreshState();
     }, 3000);
+    if (isHost()) {
+      hostHeartbeat = window.setInterval(async () => {
+        await broadcastState();
+      }, 4000);
+    }
   })
   .catch(() => {
     streamTitleHeading.textContent = "Stream not found";
@@ -154,4 +170,5 @@ loadStream()
 
 window.addEventListener("beforeunload", () => {
   if (pollTimer) window.clearInterval(pollTimer);
+  if (hostHeartbeat) window.clearInterval(hostHeartbeat);
 });
