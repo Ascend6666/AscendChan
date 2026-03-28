@@ -8,6 +8,7 @@ const boardMeta = {
   tech: { title: "/tech/", description: "Programming, tools, terminals, and side projects." },
   exam: { title: "/exam/", description: "Test prep, panic control, revision plans, and deadline survival." },
   meta: { title: "/meta/", description: "Requests, feedback, bugs, and moderation." },
+  stream: { title: "/stream/", description: "Watch parties, premieres, and scheduled streams together." },
 };
 
 const storageKeys = {
@@ -47,6 +48,15 @@ const savePreferences = document.getElementById("savePreferences");
 const resetPreferences = document.getElementById("resetPreferences");
 const themeButtons = document.querySelectorAll("[data-theme-option]");
 const fontWeightButtons = document.querySelectorAll("[data-font-weight]");
+const streamBoard = document.getElementById("streamBoard");
+const streamComposer = document.getElementById("streamComposer");
+const toggleStreamComposer = document.getElementById("toggleStreamComposer");
+const streamTitle = document.getElementById("streamTitle");
+const streamUrl = document.getElementById("streamUrl");
+const streamSchedule = document.getElementById("streamSchedule");
+const streamMode = document.getElementById("streamMode");
+const createStreamButton = document.getElementById("createStreamButton");
+const streamList = document.getElementById("streamList");
 
 let draftPrefs = loadPreferences();
 let currentView = localStorage.getItem(storageKeys.threadView) || "list";
@@ -201,6 +211,30 @@ function renderThreads() {
   renderCatalog(threads);
 }
 
+function renderStreams(streams) {
+  if (!streamList) return;
+  if (!streams.length) {
+    streamList.innerHTML = '<p class="empty-state">No streams yet.</p>';
+    return;
+  }
+  streamList.innerHTML = streams.map((stream) => {
+    const when = stream.scheduled_at ? new Date(stream.scheduled_at).toLocaleString() : "Now";
+    const status = stream.status === "live" ? "live now" : "scheduled";
+    return `
+      <article class="thread-card stream-card">
+        <div class="thread-card-head">
+          <span class="thread-no">${status}</span>
+          <div class="post-actions">
+            <a class="reply-inline-button" href="stream-room.html?stream=${stream.id}">Join</a>
+          </div>
+        </div>
+        <h3>${stream.title}</h3>
+        <p>${stream.mode} mode / ${when}</p>
+      </article>
+    `;
+  }).join("");
+}
+
 function syncViewMode() {
   const catalogMode = currentView === "catalog";
   catalogPanel.classList.toggle("hidden", !catalogMode);
@@ -232,7 +266,47 @@ async function createThread() {
   }
 }
 
+function extractYouTubeId(url) {
+  if (!url) return "";
+  const match = url.match(/(?:v=|youtu\.be\/|embed\/)([a-zA-Z0-9_-]{6,})/);
+  return match ? match[1] : "";
+}
+
+async function createStream() {
+  if (!streamTitle || !streamUrl || !streamMode || !createStreamButton) return;
+  const title = streamTitle.value.trim();
+  const url = streamUrl.value.trim();
+  const mode = streamMode.value;
+  const scheduledAt = streamSchedule?.value ? new Date(streamSchedule.value).toISOString() : null;
+  const videoId = extractYouTubeId(url);
+  if (!title || !videoId) {
+    alert("Add a title and a valid YouTube link.");
+    return;
+  }
+  try {
+    const id = await window.AscendApi.createStream({
+      title,
+      youtube_id: videoId,
+      scheduled_at: scheduledAt,
+      mode,
+    });
+    streamTitle.value = "";
+    streamUrl.value = "";
+    if (streamSchedule) streamSchedule.value = "";
+    streamComposer?.classList.add("hidden");
+    await refreshBoard();
+    window.location.href = `stream-room.html?stream=${id}`;
+  } catch (error) {
+    alert(error.message || "Could not create stream.");
+  }
+}
+
 async function refreshBoard() {
+  if (currentBoard === "stream") {
+    const streams = await window.AscendApi.listStreams();
+    renderStreams(streams);
+    return;
+  }
   currentThreads = await window.AscendApi.listThreads(currentBoard);
   renderThreads();
   await renderBookmarks();
@@ -323,6 +397,8 @@ catalogViewButton.addEventListener("click", () => {
   localStorage.setItem(storageKeys.threadView, currentView);
   syncViewMode();
 });
+toggleStreamComposer?.addEventListener("click", () => streamComposer?.classList.toggle("hidden"));
+createStreamButton?.addEventListener("click", createStream);
 document.addEventListener("click", async (event) => {
   const bookmarkButton = event.target.closest("[data-bookmark-thread]");
   if (bookmarkButton) {
@@ -345,6 +421,12 @@ document.addEventListener("click", async (event) => {
 applyPreferences(draftPrefs);
 renderBoardMeta();
 syncViewMode();
+if (currentBoard === "stream") {
+  document.querySelectorAll(".board-tools, #threadComposer, #bookmarkPanel, .thread-list-panel").forEach((panel) => {
+    panel?.classList.add("hidden");
+  });
+  streamBoard?.classList.remove("hidden");
+}
 refreshBoard().catch(() => {
   threadList.innerHTML = '<p class="empty-state">Could not load threads.</p>';
 });

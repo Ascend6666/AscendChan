@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ascend Chan Stream</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body data-theme="classic-olive" data-font="tahoma">
+    <main class="page stream-room-page">
+      <header class="topbar board-topbar">
+        <div class="brand-block board-brand">
+          <div class="brand-lockup board-lockup">
+            <span class="site-logo" aria-hidden="true">
+              <span class="crosshair-vert crosshair-long"></span>
+              <span class="crosshair-horz crosshair-long"></span>
+              <span class="crosshair-corner corner-top-left"></span>
+              <span class="crosshair-corner corner-top-right"></span>
+              <span class="crosshair-corner corner-bottom-left"></span>
+              <span class="crosshair-corner corner-bottom-right"></span>
+              <span class="crosshair-center"></span>
+            </span>
+            <h1 id="streamTitleHeading" class="board-page-title">Stream</h1>
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <a class="utility-button" href="board.html?board=stream">Back to /stream/</a>
+        </div>
+      </header>
+
+      <div class="stream-room">
+        <section class="stream-player">
+          <div class="stream-meta">
+            <span id="streamStatusBadge" class="thread-no">scheduled</span>
+            <span id="streamScheduleText"></span>
+          </div>
+          <div class="stream-frame" id="streamFrameWrap">
+            <div id="ytPlayer"></div>
+          </div>
+          <div class="stream-controls hidden" id="hostControls">
+            <button class="utility-button" type="button" id="playButton">Play</button>
+            <button class="utility-button" type="button" id="pauseButton">Pause</button>
+            <button class="utility-button" type="button" id="syncButton">Sync everyone</button>
+          </div>
+        </section>
+
+        <aside class="stream-chat">
+          <div class="section-title">Chat</div>
+          <div class="stream-messages" id="streamMessages"></div>
+          <div class="stream-chat-input">
+            <input id="streamChatInput" type="text" placeholder="say something..." />
+            <button class="utility-button primary-button" type="button" id="sendStreamMessage">Send</button>
+          </div>
+        </aside>
+      </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" onerror="window.__supabaseCdnFailed=true;"></script>
+    <script>
+      if (window.__supabaseCdnFailed) {
+        document.write('<script src="https://unpkg.com/@supabase/supabase-js@2"><\/script>');
+      }
+    </script>
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script src="supabase.js"></script>
+    <script src="supabase-api.js"></script>
+    <script src="reset.js"></script>
+    <script src="stream-room.js"></script>
+  </body>
+</html>

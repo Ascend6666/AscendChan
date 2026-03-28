@@ -47,6 +47,90 @@ create table if not exists public.posts (
 alter table public.posts
   add column if not exists poster_alias text;
 
+create table if not exists public.streams (
+  id bigserial primary key,
+  title text not null,
+  youtube_id text not null,
+  scheduled_at timestamptz,
+  mode text not null default 'theater' check (mode in ('theater', 'normal')),
+  status text not null default 'scheduled' check (status in ('scheduled', 'live', 'ended')),
+  host_client_id text,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.stream_messages (
+  id bigserial primary key,
+  stream_id bigint not null references public.streams(id) on delete cascade,
+  client_id text,
+  body text not null,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.stream_state (
+  stream_id bigint primary key references public.streams(id) on delete cascade,
+  playback_time numeric not null default 0,
+  is_playing boolean not null default false,
+  updated_at timestamptz not null default now(),
+  updated_by text
+);
+
+create index if not exists stream_status_schedule_idx on public.streams (status, scheduled_at);
+create index if not exists stream_messages_stream_idx on public.stream_messages (stream_id, created_at desc);
+
+alter table public.streams enable row level security;
+alter table public.stream_messages enable row level security;
+alter table public.stream_state enable row level security;
+
+drop policy if exists "streams are readable" on public.streams;
+create policy "streams are readable"
+on public.streams
+for select
+to anon, authenticated
+using (true);
+
+drop policy if exists "public can create streams" on public.streams;
+create policy "public can create streams"
+on public.streams
+for insert
+to anon, authenticated
+with check (true);
+
+drop policy if exists "public can update streams" on public.streams;
+create policy "public can update streams"
+on public.streams
+for update
+to anon, authenticated
+using (true)
+with check (true);
+
+drop policy if exists "stream messages are readable" on public.stream_messages;
+create policy "stream messages are readable"
+on public.stream_messages
+for select
+to anon, authenticated
+using (true);
+
+drop policy if exists "public can create stream messages" on public.stream_messages;
+create policy "public can create stream messages"
+on public.stream_messages
+for insert
+to anon, authenticated
+with check (true);
+
+drop policy if exists "stream state is readable" on public.stream_state;
+create policy "stream state is readable"
+on public.stream_state
+for select
+to anon, authenticated
+using (true);
+
+drop policy if exists "public can update stream state" on public.stream_state;
+create policy "public can update stream state"
+on public.stream_state
+for insert, update
+to anon, authenticated
+with check (true);
+
 create table if not exists public.bookmarks (
   id bigserial primary key,
   user_id uuid,
@@ -118,7 +202,8 @@ values
   ('social', '/social/', 'Friendships, communication, loneliness, and real-world awkwardness.'),
   ('tech', '/tech/', 'Programming, tools, terminals, and side projects.'),
   ('exam', '/exam/', 'Test prep, panic control, revision plans, and deadline survival.'),
-  ('meta', '/meta/', 'Requests, feedback, bugs, and moderation.')
+  ('meta', '/meta/', 'Requests, feedback, bugs, and moderation.'),
+  ('stream', '/stream/', 'Watch parties, premieres, and scheduled streams together.')
 on conflict (key) do update
 set
   title = excluded.title,

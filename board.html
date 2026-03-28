@@ -5,10 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Ascend Chan Board</title>
     <link rel="stylesheet" href="style.css" />
-    <script>
-      window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
-    </script>
-    <script defer src="/_vercel/speed-insights/script.js"></script>
   </head>
   <body data-theme="classic-olive" data-font="tahoma">
     <main class="page board-page">
@@ -119,6 +115,44 @@
         <div class="section-title">Catalog</div>
         <div class="catalog-grid" id="catalogGrid">
           <p class="empty-state">No threads yet.</p>
+        </div>
+      </section>
+
+      <section class="stream-board hidden" id="streamBoard">
+        <div class="section-title">Streams</div>
+        <div class="stream-actions">
+          <button class="utility-button primary-button" type="button" id="toggleStreamComposer">Stream</button>
+        </div>
+        <section class="stream-composer hidden" id="streamComposer">
+          <div class="composer-grid">
+            <label class="select-wrap" for="streamTitle">
+              <span>Title</span>
+              <input id="streamTitle" type="text" placeholder="movie night / watch party" />
+            </label>
+            <label class="select-wrap" for="streamUrl">
+              <span>YouTube link</span>
+              <input id="streamUrl" type="url" placeholder="https://www.youtube.com/watch?v=..." />
+            </label>
+            <label class="select-wrap" for="streamSchedule">
+              <span>Schedule</span>
+              <input id="streamSchedule" type="datetime-local" />
+            </label>
+            <label class="select-wrap" for="streamMode">
+              <span>Mode</span>
+              <select id="streamMode">
+                <option value="theater">Theater</option>
+                <option value="normal">Normal</option>
+              </select>
+            </label>
+            <div class="composer-actions">
+              <button class="utility-button primary-button" type="button" id="createStreamButton">
+                Create stream
+              </button>
+            </div>
+          </div>
+        </section>
+        <div class="stream-list" id="streamList">
+          <p class="empty-state">No streams yet.</p>
         </div>
       </section>
 

@@ -215,6 +215,80 @@
       return true;
     },
 
+    async listStreams() {
+      const { data, error } = await supabase
+        .from("streams")
+        .select("*")
+        .order("status", { ascending: true })
+        .order("scheduled_at", { ascending: true });
+      if (error) throw error;
+      return data || [];
+    },
+
+    async createStream({ title, youtube_id, scheduled_at, mode }) {
+      const hostClientId = window.AscendClient.getClientId();
+      const status = scheduled_at ? "scheduled" : "live";
+      const { data, error } = await supabase
+        .from("streams")
+        .insert({
+          title,
+          youtube_id,
+          scheduled_at,
+          mode,
+          status,
+          host_client_id: hostClientId,
+        })
+        .select("id")
+        .maybeSingle();
+      if (error) throw error;
+      return data?.id;
+    },
+
+    async getStream(id) {
+      const { data, error } = await supabase.from("streams").select("*").eq("id", id).maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+
+    async listStreamMessages(streamId, limit = 80) {
+      const { data, error } = await supabase
+        .from("stream_messages")
+        .select("*")
+        .eq("stream_id", streamId)
+        .order("created_at", { ascending: true })
+        .limit(limit);
+      if (error) throw error;
+      return data || [];
+    },
+
+    async sendStreamMessage(streamId, body) {
+      const clientId = window.AscendClient.getClientId();
+      const { error } = await supabase.from("stream_messages").insert({
+        stream_id: streamId,
+        client_id: clientId,
+        body,
+      });
+      if (error) throw error;
+    },
+
+    async getStreamState(streamId) {
+      const { data, error } = await supabase.from("stream_state").select("*").eq("stream_id", streamId).maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+
+    async upsertStreamState(streamId, playback_time, is_playing) {
+      const clientId = window.AscendClient.getClientId();
+      const { error } = await supabase.from("stream_state").upsert({
+        stream_id: streamId,
+        playback_time,
+        is_playing,
+        updated_at: new Date().toISOString(),
+        updated_by: clientId,
+      });
+      if (error) throw error;
+    },
+
     async createReport(board, threadNumber, postNumber, targetPosterClientId) {
       const thread = await fetchThreadRow(board, threadNumber);
       if (!thread) throw new Error("Thread not found");
