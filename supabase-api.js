@@ -158,6 +158,12 @@
         .eq("thread_id", thread.id)
         .eq("post_number", targetPostNumber);
       if (error) throw error;
+
+      const nextCount = Math.max(0, Number(thread.reply_count || 0) - 1);
+      await supabase
+        .from("threads")
+        .update({ reply_count: nextCount, updated_at: new Date().toISOString() })
+        .eq("id", thread.id);
     },
 
     async deleteThread(board, threadNumber) {
@@ -168,6 +174,23 @@
         .from("threads")
         .update({ archived: true, updated_at: new Date().toISOString() })
         .eq("id", thread.id);
+      if (error) throw error;
+    },
+
+    async updateThreadBody(threadId, body) {
+      const { error } = await supabase
+        .from("threads")
+        .update({ body, updated_at: new Date().toISOString() })
+        .eq("id", threadId);
+      if (error) throw error;
+    },
+
+    async updatePostBody(threadId, postNumber, body) {
+      const { error } = await supabase
+        .from("posts")
+        .update({ body })
+        .eq("thread_id", threadId)
+        .eq("post_number", postNumber);
       if (error) throw error;
     },
 

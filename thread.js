@@ -148,7 +148,7 @@ function renderPostBody(text, ownerClientId) {
     todoChecked = 0;
   };
 
-  lines.forEach((line) => {
+  lines.forEach((line, index) => {
     const todoMatch = line.match(/^\s*\[(?:\s*x\s*)?\]\s*(.*)$/i);
     let baseLine = line;
     if (todoMatch && todoMatch[1]) {
@@ -161,7 +161,7 @@ function renderPostBody(text, ownerClientId) {
       todoTotal += 1;
       if (checked) todoChecked += 1;
       output.push(`
-        <label class="todo-line${checked ? " is-checked" : ""}">
+        <label class="todo-line${checked ? " is-checked" : ""}" data-line-index="${index}">
           <input type="checkbox" ${checked ? "checked" : ""} ${isOwner ? "" : "disabled"} />
           <span>${todoText}</span>
         </label>
@@ -214,6 +214,30 @@ function highlightCode(code) {
   html = html.replace(/__ENT(\d+)__/g, (_, i) => entities[Number(i)]);
   html = html.replace(/(&quot;.*?&quot;|&#39;.*?&#39;)/g, '<span class="code-token-string">$1</span>');
   return html;
+}
+
+function encodeBody(raw) {
+  return window.btoa(unescape(encodeURIComponent(raw)));
+}
+
+function decodeBody(encoded) {
+  try {
+    return decodeURIComponent(escape(window.atob(encoded)));
+  } catch {
+    return "";
+  }
+}
+
+function toggleTodoLine(rawBody, lineIndex, checked) {
+  const lines = rawBody.split("\n");
+  const line = lines[lineIndex];
+  if (!line) return rawBody;
+  const match = line.match(/^\s*\[(?:\s*x\s*)?\]\s*(.*)$/i);
+  if (!match) return rawBody;
+  const text = match[1];
+  const prefix = checked ? "[x] " : "[] ";
+  lines[lineIndex] = `${prefix}${text}`;
+  return lines.join("\n");
 }
 
 function collectReferences(threadData) {
@@ -326,7 +350,9 @@ async function renderThreadPage() {
           </div>
         </div>
         <h3>${escapeHtml(threadData.subject)}</h3>
-        <p>${renderPostBody(threadData.body, threadData.poster_client_id)}</p>
+        <p class="post-body" data-thread-id="${threadData.id}" data-post-number="1" data-is-op="true" data-body="${encodeBody(threadData.body)}">
+          ${renderPostBody(threadData.body, threadData.poster_client_id)}
+        </p>
         ${renderBacklinks(references, threadData.opPostId)}
       </article>
       ${threadData.replies.length ? threadData.replies.map((reply) => `
@@ -340,7 +366,9 @@ async function renderThreadPage() {
               <span class="post-id">${reply.postId}</span>
             </div>
           </div>
-          <p>${renderPostBody(reply.body, reply.poster_client_id)}</p>
+          <p class="post-body" data-thread-id="${threadData.id}" data-post-number="${reply.post_number}" data-is-op="false" data-body="${encodeBody(reply.body)}">
+            ${renderPostBody(reply.body, reply.poster_client_id)}
+          </p>
           ${renderBacklinks(references, reply.postId)}
         </article>
       `).join("") : '<p class="empty-state">No replies yet.</p>'}
@@ -449,6 +477,21 @@ document.addEventListener("click", async (event) => {
     wrapper?.classList.toggle("is-checked", todoToggle.checked);
     const block = event.target.closest(".todo-block");
     if (block) {
+      const postBody = block.closest(".post-body");
+      const lineIndex = Number(wrapper?.dataset.lineIndex);
+      if (postBody && Number.isFinite(lineIndex)) {
+        const encoded = postBody.dataset.body || "";
+        const rawBody = decodeBody(encoded);
+        const updatedBody = toggleTodoLine(rawBody, lineIndex, todoToggle.checked);
+        const threadId = Number(postBody.dataset.threadId);
+        const isOp = postBody.dataset.isOp === "true";
+        const postNumber = Number(postBody.dataset.postNumber);
+        if (isOp) {
+          window.AscendApi.updateThreadBody(threadId, updatedBody).then(renderThreadPage).catch(() => {});
+        } else {
+          window.AscendApi.updatePostBody(threadId, postNumber, updatedBody).then(renderThreadPage).catch(() => {});
+        }
+      }
       const inputs = block.querySelectorAll(".todo-line input");
       const checked = block.querySelectorAll(".todo-line input:checked");
       const total = inputs.length;

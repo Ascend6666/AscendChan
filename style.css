@@ -420,7 +420,7 @@ textarea {
 
 .todo-block {
   display: grid;
-  gap: 6px;
+  gap: 2px;
 }
 
 .todo-progress {
@@ -440,6 +440,27 @@ textarea {
 
 .todo-progress.is-complete .todo-progress-bar {
   background: color-mix(in srgb, #63d27a 70%, var(--accent) 30%);
+}
+
+body[data-theme="amber-noir"] .todo-progress.is-complete .todo-progress-bar,
+body[data-theme="retro-terminal"] .todo-progress.is-complete .todo-progress-bar {
+  background: color-mix(in srgb, #f2c37b 70%, var(--accent) 30%);
+}
+
+body[data-theme="mist-blue"] .todo-progress.is-complete .todo-progress-bar {
+  background: color-mix(in srgb, #8ec5ff 70%, var(--accent) 30%);
+}
+
+body[data-theme="blush-pink"] .todo-progress.is-complete .todo-progress-bar {
+  background: color-mix(in srgb, #ff9fb1 70%, var(--accent) 30%);
+}
+
+body[data-theme="violet-haze"] .todo-progress.is-complete .todo-progress-bar {
+  background: color-mix(in srgb, #b6a1ff 70%, var(--accent) 30%);
+}
+
+body[data-theme="minimal-dark"] .todo-progress.is-complete .todo-progress-bar {
+  background: color-mix(in srgb, #8bd7ff 70%, var(--accent) 30%);
 }
 
 .todo-progress-label {
