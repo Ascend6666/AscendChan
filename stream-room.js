@@ -9,6 +9,7 @@ const hostControls = document.getElementById("hostControls");
 const playButton = document.getElementById("playButton");
 const pauseButton = document.getElementById("pauseButton");
 const syncButton = document.getElementById("syncButton");
+const endStreamButton = document.getElementById("endStreamButton");
 const layoutNormalButton = document.getElementById("layoutNormalButton");
 const layoutTheaterButton = document.getElementById("layoutTheaterButton");
 
@@ -144,6 +145,12 @@ function updateScheduleUi() {
   streamScheduleText.textContent = `starts in ${minutes}m ${seconds}s`;
 }
 
+function showEndedState() {
+  streamStatusBadge.textContent = "ended";
+  streamScheduleText.textContent = "stream ended";
+  hostControls.classList.add("hidden");
+}
+
 async function refreshMessages() {
   if (!streamData) return;
   const list = await window.AscendApi.listStreamMessages(streamData.id);
@@ -248,6 +255,17 @@ syncButton?.addEventListener("click", async () => {
   await broadcastState();
 });
 
+endStreamButton?.addEventListener("click", async () => {
+  if (!streamData || !isHost()) return;
+  try {
+    await window.AscendApi.updateStreamStatus(streamData.id, "ended");
+    streamData.status = "ended";
+    showEndedState();
+  } catch {
+    alert("Could not end stream.");
+  }
+});
+
 loadStream()
   .then(async () => {
     applyPreferences(loadPreferences());
@@ -263,7 +281,11 @@ loadStream()
     }
     await refreshMessages();
     setupMessageRealtime();
-    updateScheduleUi();
+    if (streamData.status === "ended") {
+      showEndedState();
+    } else {
+      updateScheduleUi();
+    }
     if (streamData?.scheduled_at) {
       scheduleTimer = window.setInterval(updateScheduleUi, 1000);
     }
