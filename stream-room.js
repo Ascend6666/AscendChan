@@ -45,7 +45,7 @@ function isHost() {
 
 function formatMessage(msg) {
   const name = msg.display_name || "anon";
-  return `<div class="stream-message"><strong>${escapeHtml(name)}</strong> ${escapeHtml(msg.body)}</div>`;
+  return `<div class="stream-message"><strong>${escapeHtml(name)}</strong>: ${escapeHtml(msg.body)}</div>`;
 }
 
 function escapeHtml(text) {
