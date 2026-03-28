@@ -346,6 +346,8 @@ textarea {
   background: var(--panel);
   box-shadow: inset 0 1px 0 var(--panel-edge);
   max-width: 360px;
+  text-decoration: none;
+  display: block;
 }
 
 .noticeboard-display {
@@ -358,6 +360,23 @@ textarea {
   margin-top: 8px;
   display: grid;
   gap: 8px;
+}
+
+.noticeboard-cta {
+  margin-top: 6px;
+  font-size: calc(9px * var(--content-font-scale));
+  color: var(--muted);
+}
+
+.noticeboard-page .noticeboard-panel {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  padding: 12px;
+}
+
+.noticeboard-display-large {
+  font-size: calc(14px * var(--content-font-scale));
+  white-space: pre-line;
 }
 
 .brand-lockup {

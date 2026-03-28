@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ascend Chan Noticeboard</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body data-theme="classic-olive" data-font="tahoma">
+    <main class="page board-page noticeboard-page">
+      <header class="topbar board-topbar">
+        <div class="brand-block board-brand">
+          <div class="brand-lockup board-lockup">
+            <span class="site-logo" aria-hidden="true">
+              <span class="crosshair-vert crosshair-long"></span>
+              <span class="crosshair-horz crosshair-long"></span>
+              <span class="crosshair-corner corner-top-left"></span>
+              <span class="crosshair-corner corner-top-right"></span>
+              <span class="crosshair-corner corner-bottom-left"></span>
+              <span class="crosshair-corner corner-bottom-right"></span>
+              <span class="crosshair-center"></span>
+            </span>
+            <h1 class="board-page-title">Noticeboard</h1>
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <a class="utility-button" href="index.html">Home</a>
+        </div>
+      </header>
+
+      <div class="noticeboard-panel">
+        <div class="noticeboard-display noticeboard-display-large" id="noticeboardDisplay"></div>
+        <div class="noticeboard-editor hidden" id="noticeboardEditor">
+          <label class="select-wrap" for="noticeboardInput">
+            <span>Admin notice</span>
+            <textarea id="noticeboardInput" rows="6" placeholder="Write a notice for everyone..."></textarea>
+          </label>
+          <button class="utility-button primary-button" type="button" id="saveNoticeboard">
+            Save notice
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" onerror="window.__supabaseCdnFailed=true;"></script>
+    <script>
+      if (window.__supabaseCdnFailed) {
+        document.write('<script src="https://unpkg.com/@supabase/supabase-js@2"><\/script>');
+      }
+    </script>
+    <script src="supabase.js"></script>
+    <script src="supabase-api.js"></script>
+    <script src="reset.js"></script>
+    <script src="noticeboard.js"></script>
+  </body>
+</html>
