@@ -125,10 +125,18 @@ to anon, authenticated
 using (true);
 
 drop policy if exists "public can update stream state" on public.stream_state;
+create policy "public can insert stream state"
+on public.stream_state
+for insert
+to anon, authenticated
+with check (true);
+
+drop policy if exists "public can update stream state" on public.stream_state;
 create policy "public can update stream state"
 on public.stream_state
-for insert, update
+for update
 to anon, authenticated
+using (true)
 with check (true);
 
 create table if not exists public.bookmarks (
