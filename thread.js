@@ -486,10 +486,15 @@ document.addEventListener("click", async (event) => {
         const threadId = Number(postBody.dataset.threadId);
         const isOp = postBody.dataset.isOp === "true";
         const postNumber = Number(postBody.dataset.postNumber);
-        if (isOp) {
-          window.AscendApi.updateThreadBody(threadId, updatedBody).then(renderThreadPage).catch(() => {});
-        } else {
-          window.AscendApi.updatePostBody(threadId, postNumber, updatedBody).then(renderThreadPage).catch(() => {});
+        try {
+          if (isOp) {
+            await window.AscendApi.updateThreadBody(threadId, updatedBody);
+          } else {
+            await window.AscendApi.updatePostBody(threadId, postNumber, updatedBody);
+          }
+          await renderThreadPage();
+        } catch (error) {
+          alert(error.message || "Could not update checklist.");
         }
       }
       const inputs = block.querySelectorAll(".todo-line input");
