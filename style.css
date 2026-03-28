@@ -355,6 +355,13 @@ textarea {
   max-width: none;
 }
 
+.noticeboard-link {
+  display: block;
+  color: var(--text);
+  text-decoration: none;
+  font-size: calc(11px * var(--content-font-scale));
+}
+
 .noticeboard-display {
   font-size: calc(11px * var(--content-font-scale));
   color: var(--text);
