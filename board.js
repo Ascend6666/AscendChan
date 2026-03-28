@@ -54,7 +54,6 @@ const toggleStreamComposer = document.getElementById("toggleStreamComposer");
 const streamTitle = document.getElementById("streamTitle");
 const streamUrl = document.getElementById("streamUrl");
 const streamSchedule = document.getElementById("streamSchedule");
-const streamMode = document.getElementById("streamMode");
 const createStreamButton = document.getElementById("createStreamButton");
 const streamList = document.getElementById("streamList");
 
@@ -229,7 +228,7 @@ function renderStreams(streams) {
           </div>
         </div>
         <h3>${stream.title}</h3>
-        <p>${stream.mode} mode / ${when}</p>
+        <p>${when}</p>
       </article>
     `;
   }).join("");
@@ -273,10 +272,9 @@ function extractYouTubeId(url) {
 }
 
 async function createStream() {
-  if (!streamTitle || !streamUrl || !streamMode || !createStreamButton) return;
+  if (!streamTitle || !streamUrl || !createStreamButton) return;
   const title = streamTitle.value.trim();
   const url = streamUrl.value.trim();
-  const mode = streamMode.value;
   const scheduledAt = streamSchedule?.value ? new Date(streamSchedule.value).toISOString() : null;
   const videoId = extractYouTubeId(url);
   if (!title || !videoId) {
@@ -288,7 +286,6 @@ async function createStream() {
       title,
       youtube_id: videoId,
       scheduled_at: scheduledAt,
-      mode,
     });
     streamTitle.value = "";
     streamUrl.value = "";

@@ -225,7 +225,7 @@
       return data || [];
     },
 
-    async createStream({ title, youtube_id, scheduled_at, mode }) {
+    async createStream({ title, youtube_id, scheduled_at }) {
       const hostClientId = window.AscendClient.getClientId();
       const status = scheduled_at ? "scheduled" : "live";
       const { data, error } = await supabase
@@ -234,7 +234,6 @@
           title,
           youtube_id,
           scheduled_at,
-          mode,
           status,
           host_client_id: hostClientId,
         })

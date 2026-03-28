@@ -1034,6 +1034,12 @@ textarea {
   padding: 12px;
 }
 
+.stream-layout-toggle {
+  display: inline-flex;
+  gap: 6px;
+  margin-left: auto;
+}
+
 .stream-player {
   background: var(--panel);
   border: 1px solid var(--line);
@@ -1122,6 +1128,14 @@ textarea {
   .stream-chat {
     max-height: 40vh;
   }
+}
+
+.stream-room[data-layout="theater"] {
+  grid-template-columns: 1fr;
+}
+
+.stream-room[data-layout="theater"] .stream-chat {
+  max-height: none;
 }
 
 .catalog-card p {

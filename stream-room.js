@@ -9,6 +9,8 @@ const hostControls = document.getElementById("hostControls");
 const playButton = document.getElementById("playButton");
 const pauseButton = document.getElementById("pauseButton");
 const syncButton = document.getElementById("syncButton");
+const layoutNormalButton = document.getElementById("layoutNormalButton");
+const layoutTheaterButton = document.getElementById("layoutTheaterButton");
 
 let streamData = null;
 let player = null;
@@ -17,6 +19,7 @@ let hostHeartbeat = null;
 let lastMessageCount = 0;
 let lockedDisplayName = "";
 let scheduleTimer = null;
+let layoutMode = "normal";
 
 function getStreamId() {
   const params = new URLSearchParams(window.location.search);
@@ -60,6 +63,16 @@ function initPlayer(videoId) {
       },
     },
   });
+}
+
+function applyLayout(mode) {
+  layoutMode = mode === "theater" ? "theater" : "normal";
+  document.querySelector(".stream-room")?.setAttribute("data-layout", layoutMode);
+  layoutNormalButton?.classList.toggle("primary-button", layoutMode === "normal");
+  layoutTheaterButton?.classList.toggle("primary-button", layoutMode === "theater");
+  if (streamData) {
+    localStorage.setItem(`ascendchan-stream-layout:${streamData.id}`, layoutMode);
+  }
 }
 
 async function loadStream() {
@@ -208,6 +221,8 @@ syncButton?.addEventListener("click", async () => {
 
 loadStream()
   .then(async () => {
+    const savedLayout = localStorage.getItem(`ascendchan-stream-layout:${getStreamId()}`) || "normal";
+    applyLayout(savedLayout);
     if (streamDisplayName) {
       const saved = localStorage.getItem(`ascendchan-stream-name:${getStreamId()}`) || "";
       streamDisplayName.value = saved;
@@ -240,3 +255,6 @@ window.addEventListener("beforeunload", () => {
   if (hostHeartbeat) window.clearInterval(hostHeartbeat);
   if (scheduleTimer) window.clearInterval(scheduleTimer);
 });
+
+layoutNormalButton?.addEventListener("click", () => applyLayout("normal"));
+layoutTheaterButton?.addEventListener("click", () => applyLayout("theater"));
