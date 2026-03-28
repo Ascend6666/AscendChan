@@ -15,6 +15,7 @@ let player = null;
 let pollTimer = null;
 let hostHeartbeat = null;
 let lastMessageCount = 0;
+let lockedDisplayName = "";
 
 function getStreamId() {
   const params = new URLSearchParams(window.location.search);
@@ -113,11 +114,20 @@ async function sendMessage() {
   const text = streamChatInput.value.trim();
   if (!text || !streamData) return;
   try {
-    const name = streamDisplayName?.value.trim();
-    if (streamDisplayName && name) {
-      localStorage.setItem("ascendchan-stream-name", name);
+    const name = lockedDisplayName || streamDisplayName?.value.trim();
+    if (!name) {
+      alert("Set your username first.");
+      return;
     }
-    await window.AscendApi.sendStreamMessage(streamData.id, text, name);
+    if (!lockedDisplayName) {
+      lockedDisplayName = name;
+      if (streamDisplayName) {
+        streamDisplayName.value = name;
+        streamDisplayName.disabled = true;
+      }
+      localStorage.setItem(`ascendchan-stream-name:${streamData.id}`, name);
+    }
+    await window.AscendApi.sendStreamMessage(streamData.id, text, lockedDisplayName);
     streamChatInput.value = "";
     await refreshMessages();
   } catch (error) {
@@ -159,8 +169,12 @@ syncButton?.addEventListener("click", async () => {
 loadStream()
   .then(async () => {
     if (streamDisplayName) {
-      const saved = localStorage.getItem("ascendchan-stream-name") || "";
+      const saved = localStorage.getItem(`ascendchan-stream-name:${getStreamId()}`) || "";
       streamDisplayName.value = saved;
+      if (saved) {
+        lockedDisplayName = saved;
+        streamDisplayName.disabled = true;
+      }
     }
     await refreshMessages();
     pollTimer = window.setInterval(async () => {
