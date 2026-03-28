@@ -1,0 +1,27 @@
+{
+  "name": "ascend-chan",
+  "version": "1.0.0",
+  "description": "Ascend Chan - A forum platform for self-improvement",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SarthakArghode/AscendChan.git"
+  },
+  "keywords": [
+    "forum",
+    "imageboard",
+    "self-improvement"
+  ],
+  "author": "Sarthak Arghode",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/SarthakArghode/AscendChan/issues"
+  },
+  "homepage": "https://github.com/SarthakArghode/AscendChan#readme",
+  "dependencies": {
+    "@vercel/speed-insights": "^2.0.0"
+  }
+}
