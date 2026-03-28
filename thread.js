@@ -125,19 +125,48 @@ function escapeHtml(text) {
 function renderPostBody(text) {
   let codeCounter = 0;
   const lines = escapeHtml(text).split("\n");
-  return lines.map((line) => {
+  let inTodoBlock = false;
+  let todoTotal = 0;
+  let todoChecked = 0;
+  const output = [];
+
+  const closeTodoBlock = () => {
+    if (!inTodoBlock) return;
+    const percent = todoTotal ? Math.round((todoChecked / todoTotal) * 100) : 0;
+    output.push(`
+      <div class="todo-progress" data-total="${todoTotal}" data-checked="${todoChecked}">
+        <div class="todo-progress-bar" style="width:${percent}%;"></div>
+        <span class="todo-progress-label">${todoChecked}/${todoTotal}</span>
+      </div>
+    `);
+    output.push(`</div>`);
+    inTodoBlock = false;
+    todoTotal = 0;
+    todoChecked = 0;
+  };
+
+  lines.forEach((line) => {
     const todoMatch = line.match(/^\s*\[(?:\s*x\s*)?\]\s*(.*)$/i);
     let baseLine = line;
     if (todoMatch && todoMatch[1]) {
       const checked = /\[\s*x\s*\]/i.test(line);
       const todoText = todoMatch[1];
-      return `
+      if (!inTodoBlock) {
+        inTodoBlock = true;
+        output.push(`<div class="todo-block">`);
+      }
+      todoTotal += 1;
+      if (checked) todoChecked += 1;
+      output.push(`
         <label class="todo-line${checked ? " is-checked" : ""}">
           <input type="checkbox" ${checked ? "checked" : ""} />
           <span>${todoText}</span>
         </label>
-      `.trim();
+      `.trim());
+      return;
     }
+
+    closeTodoBlock();
 
     const withLinks = baseLine.replace(/((https?:\/\/)?(?:www\.)?[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(?:\/[^\s<]*)?)/g, (match, url) => {
       const href = url.startsWith("http://") || url.startsWith("https://") ? url : `https://${url}`;
@@ -159,9 +188,15 @@ function renderPostBody(text) {
     formatted = formatted.replace(/_([^_]+)_/g, "<u>$1</u>");
     formatted = formatted.replace(/\*([^*]+)\*/g, "<em>$1</em>");
 
-    if (baseLine.startsWith("&gt;") && !baseLine.startsWith("&gt;&gt;")) return `<span class="greentext">${formatted}</span>`;
-    return formatted;
-  }).join("<br>");
+    if (baseLine.startsWith("&gt;") && !baseLine.startsWith("&gt;&gt;")) {
+      output.push(`<span class="greentext">${formatted}</span>`);
+      return;
+    }
+    output.push(formatted);
+  });
+
+  closeTodoBlock();
+  return output.join("<br>");
 }
 
 function highlightCode(code) {
@@ -408,6 +443,18 @@ document.addEventListener("click", async (event) => {
   if (todoToggle) {
     const wrapper = event.target.closest(".todo-line");
     wrapper?.classList.toggle("is-checked", todoToggle.checked);
+    const block = event.target.closest(".todo-block");
+    if (block) {
+      const inputs = block.querySelectorAll(".todo-line input");
+      const checked = block.querySelectorAll(".todo-line input:checked");
+      const total = inputs.length;
+      const done = checked.length;
+      const bar = block.querySelector(".todo-progress-bar");
+      const label = block.querySelector(".todo-progress-label");
+      const percent = total ? Math.round((done / total) * 100) : 0;
+      if (bar) bar.style.width = `${percent}%`;
+      if (label) label.textContent = `${done}/${total}`;
+    }
     return;
   }
   const codeToggle = event.target.closest("[data-code-toggle]");
