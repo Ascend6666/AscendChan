@@ -925,6 +925,8 @@ textarea {
   gap: 6px;
   min-width: 0;
   max-width: none;
+  margin-left: auto;
+  flex-shrink: 0;
 }
 
 .post-id {
