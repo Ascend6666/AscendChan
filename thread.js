@@ -469,46 +469,59 @@ replyBody.addEventListener("keydown", (event) => {
   }
 });
 
+async function handleTodoToggle(todoToggle) {
+  if (todoToggle.disabled) return;
+  const wrapper = todoToggle.closest(".todo-line");
+  wrapper?.classList.toggle("is-checked", todoToggle.checked);
+  const block = todoToggle.closest(".todo-block");
+  if (block) {
+    const postBody = block.closest(".post-body");
+    const lineIndex = Number(wrapper?.dataset.lineIndex);
+    if (postBody && Number.isFinite(lineIndex)) {
+      const encoded = postBody.dataset.body || "";
+      const rawBody = decodeBody(encoded);
+      const updatedBody = toggleTodoLine(rawBody, lineIndex, todoToggle.checked);
+      const threadId = Number(postBody.dataset.threadId);
+      const isOp = postBody.dataset.isOp === "true";
+      const postNumber = Number(postBody.dataset.postNumber);
+      try {
+        if (isOp) {
+          await window.AscendApi.updateThreadBody(threadId, updatedBody);
+        } else {
+          await window.AscendApi.updatePostBody(threadId, postNumber, updatedBody);
+        }
+        postBody.dataset.body = encodeBody(updatedBody);
+        await renderThreadPage();
+      } catch (error) {
+        alert(error.message || "Could not update checklist.");
+      }
+    }
+    const inputs = block.querySelectorAll(".todo-line input");
+    const checked = block.querySelectorAll(".todo-line input:checked");
+    const total = inputs.length;
+    const done = checked.length;
+    const bar = block.querySelector(".todo-progress-bar");
+    const label = block.querySelector(".todo-progress-label");
+    const progress = block.querySelector(".todo-progress");
+    const percent = total ? Math.round((done / total) * 100) : 0;
+    if (bar) bar.style.width = `${percent}%`;
+    if (label) label.textContent = `${done}/${total}`;
+    if (progress) progress.classList.toggle("is-complete", total > 0 && done === total);
+  }
+}
+
+document.addEventListener("change", async (event) => {
+  const todoToggle = event.target.closest(".todo-line input");
+  if (todoToggle) {
+    await handleTodoToggle(todoToggle);
+    return;
+  }
+});
+
 document.addEventListener("click", async (event) => {
   const todoToggle = event.target.closest(".todo-line input");
   if (todoToggle) {
-    if (todoToggle.disabled) return;
-    const wrapper = event.target.closest(".todo-line");
-    wrapper?.classList.toggle("is-checked", todoToggle.checked);
-    const block = event.target.closest(".todo-block");
-    if (block) {
-      const postBody = block.closest(".post-body");
-      const lineIndex = Number(wrapper?.dataset.lineIndex);
-      if (postBody && Number.isFinite(lineIndex)) {
-        const encoded = postBody.dataset.body || "";
-        const rawBody = decodeBody(encoded);
-        const updatedBody = toggleTodoLine(rawBody, lineIndex, todoToggle.checked);
-        const threadId = Number(postBody.dataset.threadId);
-        const isOp = postBody.dataset.isOp === "true";
-        const postNumber = Number(postBody.dataset.postNumber);
-        try {
-          if (isOp) {
-            await window.AscendApi.updateThreadBody(threadId, updatedBody);
-          } else {
-            await window.AscendApi.updatePostBody(threadId, postNumber, updatedBody);
-          }
-          await renderThreadPage();
-        } catch (error) {
-          alert(error.message || "Could not update checklist.");
-        }
-      }
-      const inputs = block.querySelectorAll(".todo-line input");
-      const checked = block.querySelectorAll(".todo-line input:checked");
-      const total = inputs.length;
-      const done = checked.length;
-      const bar = block.querySelector(".todo-progress-bar");
-      const label = block.querySelector(".todo-progress-label");
-      const progress = block.querySelector(".todo-progress");
-      const percent = total ? Math.round((done / total) * 100) : 0;
-      if (bar) bar.style.width = `${percent}%`;
-      if (label) label.textContent = `${done}/${total}`;
-      if (progress) progress.classList.toggle("is-complete", total > 0 && done === total);
-    }
+    await handleTodoToggle(todoToggle);
     return;
   }
   const codeToggle = event.target.closest("[data-code-toggle]");
