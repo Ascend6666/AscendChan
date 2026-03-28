@@ -30,6 +30,7 @@ let lastMessageCount = 0;
 let lockedDisplayName = "";
 let scheduleTimer = null;
 let layoutMode = "normal";
+let messageChannel = null;
 
 function getStreamId() {
   const params = new URLSearchParams(window.location.search);
@@ -152,6 +153,23 @@ async function refreshMessages() {
   lastMessageCount = list.length;
 }
 
+function setupMessageRealtime() {
+  if (!window.AscendSupabase?.channel || !streamData?.id) return;
+  if (messageChannel) {
+    window.AscendSupabase.removeChannel(messageChannel);
+  }
+  messageChannel = window.AscendSupabase
+    .channel(`stream-messages-${streamData.id}`)
+    .on(
+      "postgres_changes",
+      { event: "INSERT", schema: "public", table: "stream_messages", filter: `stream_id=eq.${streamData.id}` },
+      () => {
+        refreshMessages().catch(() => {});
+      },
+    )
+    .subscribe();
+}
+
 async function refreshState() {
   if (!streamData || !player || isHost()) return;
   const state = await window.AscendApi.getStreamState(streamData.id);
@@ -244,12 +262,12 @@ loadStream()
       }
     }
     await refreshMessages();
+    setupMessageRealtime();
     updateScheduleUi();
     if (streamData?.scheduled_at) {
       scheduleTimer = window.setInterval(updateScheduleUi, 1000);
     }
     pollTimer = window.setInterval(async () => {
-      await refreshMessages();
       await refreshState();
     }, 3000);
     if (isHost()) {
@@ -266,6 +284,7 @@ window.addEventListener("beforeunload", () => {
   if (pollTimer) window.clearInterval(pollTimer);
   if (hostHeartbeat) window.clearInterval(hostHeartbeat);
   if (scheduleTimer) window.clearInterval(scheduleTimer);
+  if (messageChannel) window.AscendSupabase.removeChannel(messageChannel);
 });
 
 layoutNormalButton?.addEventListener("click", () => applyLayout("normal"));
