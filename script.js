@@ -25,6 +25,8 @@ const fontWeightButtons = document.querySelectorAll("[data-font-weight]");
 const boardRows = Array.from(document.querySelectorAll(".board-row"));
 const bookmarksToggle = document.getElementById("bookmarksToggle");
 const bookmarkList = document.getElementById("bookmarkList");
+const noticeboardToggle = document.getElementById("noticeboardToggle");
+const noticeboardList = document.getElementById("noticeboardList");
 const recentList = document.getElementById("recentList");
 const loginForm = document.getElementById("loginForm");
 const passwordInput = document.getElementById("passwordInput");
@@ -33,9 +35,6 @@ const dashboardRole = document.getElementById("dashboardRole");
 const roleDescription = document.getElementById("roleDescription");
 const logoutButton = document.getElementById("logoutButton");
 const noticeboardDisplay = document.getElementById("noticeboardDisplay");
-const noticeboardEditor = document.getElementById("noticeboardEditor");
-const noticeboardInput = document.getElementById("noticeboardInput");
-const saveNoticeboard = document.getElementById("saveNoticeboard");
 
 let draftPrefs = loadPreferences();
 
@@ -133,21 +132,7 @@ function syncSavedLoginState() {
 
 async function renderNoticeboard() {
   if (!noticeboardDisplay) return;
-  noticeboardDisplay.textContent = "Loading notice...";
-  try {
-    const data = await window.AscendApi.getNoticeboard();
-    const text = data?.body || "Welcome to Ascend Chan.";
-    noticeboardDisplay.textContent = text;
-    if (noticeboardInput) noticeboardInput.value = text;
-  } catch {
-    noticeboardDisplay.textContent = "Welcome to Ascend Chan.";
-  }
-}
-
-function syncNoticeboardEditor() {
-  if (!noticeboardEditor) return;
-  const role = localStorage.getItem(storageKeys.role);
-  noticeboardEditor.classList.toggle("hidden", role !== "admin");
+  noticeboardDisplay.textContent = "Noticeboard";
 }
 
 
@@ -196,6 +181,7 @@ boardRows.forEach((row) => row.addEventListener("click", () => {
   window.location.href = `board.html?board=${row.dataset.board}`;
 }));
 bookmarksToggle.addEventListener("click", () => bookmarkList.classList.toggle("hidden"));
+noticeboardToggle?.addEventListener("click", () => noticeboardList?.classList.toggle("hidden"));
 document.querySelectorAll("[data-close-panel]").forEach((button) => {
   button.addEventListener("click", () => closePanel(button.dataset.closePanel));
 });
@@ -210,23 +196,10 @@ logoutButton.addEventListener("click", () => {
   localStorage.removeItem(storageKeys.role);
   dashboardPanel.classList.add("hidden");
   syncSavedLoginState();
-  syncNoticeboardEditor();
-});
-
-saveNoticeboard?.addEventListener("click", () => {
-  if (!noticeboardInput) return;
-  if (localStorage.getItem(storageKeys.role) !== "admin") return;
-  const text = noticeboardInput.value.trim() || "Welcome to Ascend Chan.";
-  window.AscendApi.setNoticeboard(text)
-    .then(renderNoticeboard)
-    .catch(() => {
-      alert("Could not save notice.");
-    });
 });
 
 applyPreferences(draftPrefs);
 syncSavedLoginState();
 renderNoticeboard();
-syncNoticeboardEditor();
 renderBookmarks();
 renderRecentActivity();
