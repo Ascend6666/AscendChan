@@ -126,11 +126,11 @@ function renderPostBody(text) {
   let codeCounter = 0;
   const lines = escapeHtml(text).split("\n");
   return lines.map((line) => {
-    const todoMatch = line.match(/^\[( |x|X)\]\s+(.*)$/);
+    const todoMatch = line.match(/^\s*\[(?:\s*x\s*)?\]\s*(.*)$/i);
     let baseLine = line;
-    if (todoMatch) {
-      const checked = todoMatch[1].toLowerCase() === "x";
-      const todoText = todoMatch[2];
+    if (todoMatch && todoMatch[1]) {
+      const checked = /\[\s*x\s*\]/i.test(line);
+      const todoText = todoMatch[1];
       return `
         <label class="todo-line${checked ? " is-checked" : ""}">
           <input type="checkbox" ${checked ? "checked" : ""} />
@@ -166,9 +166,15 @@ function renderPostBody(text) {
 
 function highlightCode(code) {
   let html = code;
-  html = html.replace(/(&quot;.*?&quot;|&#39;.*?&#39;)/g, '<span class="code-token-string">$1</span>');
-  html = html.replace(/\b(\d+(\.\d+)?)\b/g, '<span class="code-token-number">$1</span>');
+  const entities = [];
+  html = html.replace(/(&quot;|&#39;)/g, (m) => {
+    entities.push(m);
+    return `__ENT${entities.length - 1}__`;
+  });
   html = html.replace(/\b(const|let|var|function|return|if|else|for|while|class|new|await|async|try|catch)\b/g, '<span class="code-token-keyword">$1</span>');
+  html = html.replace(/\b(\d+(\.\d+)?)\b/g, '<span class="code-token-number">$1</span>');
+  html = html.replace(/__ENT(\d+)__/g, (_, i) => entities[Number(i)]);
+  html = html.replace(/(&quot;.*?&quot;|&#39;.*?&#39;)/g, '<span class="code-token-string">$1</span>');
   return html;
 }
 
