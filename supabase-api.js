@@ -82,6 +82,9 @@
       if (latestError) throw latestError;
 
       const nextThreadNumber = latest?.length ? Number(latest[0].thread_number) + 1 : 1;
+      const posterAlias = window.AscendAlias
+        ? window.AscendAlias.getOrCreateAlias(board, nextThreadNumber, clientId)
+        : null;
       const { error } = await supabase.from("threads").insert({
         board_key: board,
         thread_number: nextThreadNumber,
@@ -90,6 +93,7 @@
         reply_count: 0,
         author_role: authorRole,
         poster_client_id: clientId,
+        poster_alias: posterAlias,
       });
       if (error) throw error;
       return nextThreadNumber;
@@ -111,6 +115,9 @@
 
       const nextPostNumber = latestReply?.length ? Number(latestReply[0].post_number) + 1 : 2;
 
+      const posterAlias = window.AscendAlias
+        ? window.AscendAlias.getOrCreateAlias(board, threadNumber, clientId)
+        : null;
       const { error: insertError } = await supabase.from("posts").insert({
         thread_id: thread.id,
         board_key: board,
@@ -118,6 +125,7 @@
         body,
         author_role: authorRole,
         poster_client_id: clientId,
+        poster_alias: posterAlias,
       });
       if (insertError) throw insertError;
 

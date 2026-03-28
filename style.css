@@ -904,6 +904,12 @@ textarea {
   background: transparent;
 }
 
+.post-alias {
+  color: color-mix(in srgb, var(--header-text) 85%, var(--muted) 15%);
+  font-size: calc(10px * var(--content-font-scale));
+  letter-spacing: 0.02em;
+}
+
 .post-actions {
   display: flex;
   flex-direction: row;

@@ -17,6 +17,7 @@ create table if not exists public.threads (
   author_id uuid,
   author_role text not null default 'anon',
   poster_client_id text,
+  poster_alias text,
   pinned boolean not null default false,
   locked boolean not null default false,
   archived boolean not null default false,
@@ -24,6 +25,9 @@ create table if not exists public.threads (
   updated_at timestamptz not null default now(),
   unique (board_key, thread_number)
 );
+
+alter table public.threads
+  add column if not exists poster_alias text;
 
 create table if not exists public.posts (
   id bigserial primary key,
@@ -34,10 +38,14 @@ create table if not exists public.posts (
   author_id uuid,
   author_role text not null default 'anon',
   poster_client_id text,
+  poster_alias text,
   created_at timestamptz not null default now(),
   deleted_at timestamptz,
   unique (thread_id, post_number)
 );
+
+alter table public.posts
+  add column if not exists poster_alias text;
 
 create table if not exists public.bookmarks (
   id bigserial primary key,
