@@ -1086,7 +1086,12 @@ textarea {
 }
 
 .stream-message {
-  display: block;
+  display: inline-block;
+  max-width: 100%;
+  padding: 6px 8px;
+  border: 1px solid var(--line);
+  background: var(--panel-2);
+  line-height: 1.25;
   word-break: break-word;
 }
 
