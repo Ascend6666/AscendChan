@@ -425,7 +425,7 @@ textarea {
 
 .todo-progress {
   position: relative;
-  height: 8px;
+  height: 4px;
   background: color-mix(in srgb, var(--panel-2) 75%, transparent);
   border: 1px solid var(--line);
   border-radius: 999px;
@@ -438,10 +438,14 @@ textarea {
   transition: width 180ms ease;
 }
 
+.todo-progress.is-complete .todo-progress-bar {
+  background: color-mix(in srgb, #63d27a 70%, var(--accent) 30%);
+}
+
 .todo-progress-label {
   position: absolute;
   right: 6px;
-  top: -18px;
+  top: -14px;
   font-size: calc(9px * var(--content-font-scale));
   color: var(--muted);
 }

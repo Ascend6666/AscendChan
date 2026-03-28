@@ -122,19 +122,22 @@ function escapeHtml(text) {
   return text.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#39;");
 }
 
-function renderPostBody(text) {
+function renderPostBody(text, ownerClientId) {
   let codeCounter = 0;
   const lines = escapeHtml(text).split("\n");
   let inTodoBlock = false;
   let todoTotal = 0;
   let todoChecked = 0;
   const output = [];
+  const clientId = window.AscendClient?.getClientId?.() || "";
+  const isOwner = !ownerClientId || ownerClientId === clientId;
 
   const closeTodoBlock = () => {
     if (!inTodoBlock) return;
     const percent = todoTotal ? Math.round((todoChecked / todoTotal) * 100) : 0;
+    const completeClass = todoTotal > 0 && todoChecked === todoTotal ? " is-complete" : "";
     output.push(`
-      <div class="todo-progress" data-total="${todoTotal}" data-checked="${todoChecked}">
+      <div class="todo-progress${completeClass}" data-total="${todoTotal}" data-checked="${todoChecked}">
         <div class="todo-progress-bar" style="width:${percent}%;"></div>
         <span class="todo-progress-label">${todoChecked}/${todoTotal}</span>
       </div>
@@ -153,13 +156,13 @@ function renderPostBody(text) {
       const todoText = todoMatch[1];
       if (!inTodoBlock) {
         inTodoBlock = true;
-        output.push(`<div class="todo-block">`);
+        output.push(`<div class="todo-block" data-owner="${ownerClientId || ""}">`);
       }
       todoTotal += 1;
       if (checked) todoChecked += 1;
       output.push(`
         <label class="todo-line${checked ? " is-checked" : ""}">
-          <input type="checkbox" ${checked ? "checked" : ""} />
+          <input type="checkbox" ${checked ? "checked" : ""} ${isOwner ? "" : "disabled"} />
           <span>${todoText}</span>
         </label>
       `.trim());
@@ -323,7 +326,7 @@ async function renderThreadPage() {
           </div>
         </div>
         <h3>${escapeHtml(threadData.subject)}</h3>
-        <p>${renderPostBody(threadData.body)}</p>
+        <p>${renderPostBody(threadData.body, threadData.poster_client_id)}</p>
         ${renderBacklinks(references, threadData.opPostId)}
       </article>
       ${threadData.replies.length ? threadData.replies.map((reply) => `
@@ -337,7 +340,7 @@ async function renderThreadPage() {
               <span class="post-id">${reply.postId}</span>
             </div>
           </div>
-          <p>${renderPostBody(reply.body)}</p>
+          <p>${renderPostBody(reply.body, reply.poster_client_id)}</p>
           ${renderBacklinks(references, reply.postId)}
         </article>
       `).join("") : '<p class="empty-state">No replies yet.</p>'}
@@ -441,6 +444,7 @@ replyBody.addEventListener("keydown", (event) => {
 document.addEventListener("click", async (event) => {
   const todoToggle = event.target.closest(".todo-line input");
   if (todoToggle) {
+    if (todoToggle.disabled) return;
     const wrapper = event.target.closest(".todo-line");
     wrapper?.classList.toggle("is-checked", todoToggle.checked);
     const block = event.target.closest(".todo-block");
@@ -451,9 +455,11 @@ document.addEventListener("click", async (event) => {
       const done = checked.length;
       const bar = block.querySelector(".todo-progress-bar");
       const label = block.querySelector(".todo-progress-label");
+      const progress = block.querySelector(".todo-progress");
       const percent = total ? Math.round((done / total) * 100) : 0;
       if (bar) bar.style.width = `${percent}%`;
       if (label) label.textContent = `${done}/${total}`;
+      if (progress) progress.classList.toggle("is-complete", total > 0 && done === total);
     }
     return;
   }
