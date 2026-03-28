@@ -1029,7 +1029,7 @@ textarea {
 
 .stream-room {
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: 3fr 1fr;
   gap: 14px;
   padding: 12px;
 }
@@ -1060,6 +1060,12 @@ textarea {
   aspect-ratio: 16 / 9;
   display: grid;
   place-items: center;
+}
+
+.stream-frame > div,
+.stream-frame iframe {
+  width: 100%;
+  height: 100%;
 }
 
 .stream-controls {
@@ -1136,6 +1142,11 @@ textarea {
 
 .stream-room[data-layout="theater"] .stream-chat {
   max-height: none;
+}
+
+.stream-room[data-layout="theater"] .stream-frame {
+  width: 100%;
+  max-height: 80vh;
 }
 
 .catalog-card p {
