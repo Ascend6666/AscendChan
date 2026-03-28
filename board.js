@@ -216,6 +216,7 @@ function renderStreams(streams) {
     streamList.innerHTML = '<p class="empty-state">No streams yet.</p>';
     return;
   }
+  const isAdmin = window.AscendClient.getRole() === "admin";
   streamList.innerHTML = streams.map((stream) => {
     const when = stream.scheduled_at ? new Date(stream.scheduled_at).toLocaleString() : "Now";
     const status = stream.status === "live" ? "live now" : "scheduled";
@@ -225,6 +226,7 @@ function renderStreams(streams) {
           <span class="thread-no">${status}</span>
           <div class="post-actions">
             <a class="reply-inline-button" href="stream-room.html?stream=${stream.id}">Join</a>
+            ${isAdmin ? `<button class="reply-inline-button danger-button" type="button" data-delete-stream="${stream.id}">Delete</button>` : ""}
           </div>
         </div>
         <h3>${stream.title}</h3>
@@ -397,6 +399,18 @@ catalogViewButton.addEventListener("click", () => {
 toggleStreamComposer?.addEventListener("click", () => streamComposer?.classList.toggle("hidden"));
 createStreamButton?.addEventListener("click", createStream);
 document.addEventListener("click", async (event) => {
+  const deleteStreamButton = event.target.closest("[data-delete-stream]");
+  if (deleteStreamButton) {
+    if (window.AscendClient.getRole() !== "admin") return;
+    const streamId = Number(deleteStreamButton.dataset.deleteStream);
+    try {
+      await window.AscendApi.deleteStream(streamId);
+      await refreshBoard();
+    } catch {
+      alert("Could not delete stream.");
+    }
+    return;
+  }
   const bookmarkButton = event.target.closest("[data-bookmark-thread]");
   if (bookmarkButton) {
     event.stopPropagation();

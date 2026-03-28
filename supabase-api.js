@@ -223,6 +223,7 @@
       const { data, error } = await supabase
         .from("streams")
         .select("*")
+        .neq("status", "ended")
         .order("status", { ascending: true })
         .order("scheduled_at", { ascending: true });
       if (error) throw error;
@@ -257,6 +258,14 @@
       const { error } = await supabase
         .from("streams")
         .update({ status })
+        .eq("id", id);
+      if (error) throw error;
+    },
+
+    async deleteStream(id) {
+      const { error } = await supabase
+        .from("streams")
+        .update({ status: "ended" })
         .eq("id", id);
       if (error) throw error;
     },
