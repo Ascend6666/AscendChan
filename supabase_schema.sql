@@ -198,6 +198,33 @@ begin
 end;
 $$;
 
+do $$
+declare
+  names text[] := array[
+    'chadjeet','nastik','hizruboi','rudraveer','veerarjun','indra','parshuram','brahmachari','gyani',
+    'shunya','agnivikram','yoddha','karna','ekagra','sanyasi','karma','shakti','aryaveer','sthitaprajna',
+    'tapasvi','shastradhari','krodansh','bhairav','mrityunjaya','tamoghana','aparajit','devendra'
+  ];
+  name_count int := array_length(names, 1);
+begin
+  update public.threads t
+  set poster_alias = names[
+    (abs(('x' || substr(md5(t.id::text || ':' || t.poster_client_id), 1, 8))::bit(32)::int) % name_count) + 1
+  ]
+  where t.poster_alias is null
+    and t.poster_client_id is not null
+    and t.author_role <> 'admin';
+
+  update public.posts p
+  set poster_alias = names[
+    (abs(('x' || substr(md5(p.thread_id::text || ':' || p.poster_client_id), 1, 8))::bit(32)::int) % name_count) + 1
+  ]
+  where p.poster_alias is null
+    and p.poster_client_id is not null
+    and p.author_role <> 'admin';
+end;
+$$;
+
 drop trigger if exists set_threads_updated_at on public.threads;
 create trigger set_threads_updated_at
 before update on public.threads
