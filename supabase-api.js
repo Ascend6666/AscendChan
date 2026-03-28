@@ -178,20 +178,28 @@
     },
 
     async updateThreadBody(threadId, body) {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("threads")
         .update({ body, updated_at: new Date().toISOString() })
-        .eq("id", threadId);
+        .eq("id", threadId)
+        .select("id");
       if (error) throw error;
+      if (!data || data.length === 0) {
+        throw new Error("Checklist update blocked. Run SQL policies + reload schema.");
+      }
     },
 
     async updatePostBody(threadId, postNumber, body) {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("posts")
         .update({ body })
         .eq("thread_id", threadId)
-        .eq("post_number", postNumber);
+        .eq("post_number", postNumber)
+        .select("id");
       if (error) throw error;
+      if (!data || data.length === 0) {
+        throw new Error("Checklist update blocked. Run SQL policies + reload schema.");
+      }
     },
 
     async listBookmarks(board) {
