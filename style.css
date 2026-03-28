@@ -350,6 +350,11 @@ textarea {
   display: block;
 }
 
+.noticeboard-compact {
+  margin: 0;
+  max-width: none;
+}
+
 .noticeboard-display {
   font-size: calc(11px * var(--content-font-scale));
   color: var(--text);
