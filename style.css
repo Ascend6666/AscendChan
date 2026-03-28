@@ -1076,6 +1076,13 @@ textarea {
   margin: 0;
 }
 
+.stream-name-note {
+  color: var(--muted);
+  font-style: normal;
+  margin-left: 6px;
+  font-size: calc(9px * var(--content-font-scale));
+}
+
 .stream-messages {
   flex: 1;
   overflow-y: auto;
