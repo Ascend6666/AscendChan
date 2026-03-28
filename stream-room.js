@@ -4,6 +4,7 @@ const streamScheduleText = document.getElementById("streamScheduleText");
 const streamMessages = document.getElementById("streamMessages");
 const streamChatInput = document.getElementById("streamChatInput");
 const sendStreamMessage = document.getElementById("sendStreamMessage");
+const streamDisplayName = document.getElementById("streamDisplayName");
 const hostControls = document.getElementById("hostControls");
 const playButton = document.getElementById("playButton");
 const pauseButton = document.getElementById("pauseButton");
@@ -26,8 +27,8 @@ function isHost() {
 }
 
 function formatMessage(msg) {
-  const name = msg.client_id ? msg.client_id.slice(-4) : "anon";
-  return `<div class="stream-message"><strong>${name}</strong> ${escapeHtml(msg.body)}</div>`;
+  const name = msg.display_name || "anon";
+  return `<div class="stream-message"><strong>${escapeHtml(name)}</strong> ${escapeHtml(msg.body)}</div>`;
 }
 
 function escapeHtml(text) {
@@ -112,7 +113,11 @@ async function sendMessage() {
   const text = streamChatInput.value.trim();
   if (!text || !streamData) return;
   try {
-    await window.AscendApi.sendStreamMessage(streamData.id, text);
+    const name = streamDisplayName?.value.trim();
+    if (streamDisplayName && name) {
+      localStorage.setItem("ascendchan-stream-name", name);
+    }
+    await window.AscendApi.sendStreamMessage(streamData.id, text, name);
     streamChatInput.value = "";
     await refreshMessages();
   } catch (error) {
@@ -153,6 +158,10 @@ syncButton?.addEventListener("click", async () => {
 
 loadStream()
   .then(async () => {
+    if (streamDisplayName) {
+      const saved = localStorage.getItem("ascendchan-stream-name") || "";
+      streamDisplayName.value = saved;
+    }
     await refreshMessages();
     pollTimer = window.setInterval(async () => {
       await refreshMessages();

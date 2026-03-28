@@ -62,9 +62,13 @@ create table if not exists public.stream_messages (
   id bigserial primary key,
   stream_id bigint not null references public.streams(id) on delete cascade,
   client_id text,
+  display_name text,
   body text not null,
   created_at timestamptz not null default now()
 );
+
+alter table public.stream_messages
+  add column if not exists display_name text;
 
 create table if not exists public.stream_state (
   stream_id bigint primary key references public.streams(id) on delete cascade,
@@ -124,7 +128,7 @@ for select
 to anon, authenticated
 using (true);
 
-drop policy if exists "public can update stream state" on public.stream_state;
+drop policy if exists "public can insert stream state" on public.stream_state;
 create policy "public can insert stream state"
 on public.stream_state
 for insert

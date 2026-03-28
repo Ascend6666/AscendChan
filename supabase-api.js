@@ -261,11 +261,12 @@
       return data || [];
     },
 
-    async sendStreamMessage(streamId, body) {
+    async sendStreamMessage(streamId, body, display_name) {
       const clientId = window.AscendClient.getClientId();
       const { error } = await supabase.from("stream_messages").insert({
         stream_id: streamId,
         client_id: clientId,
+        display_name: display_name || null,
         body,
       });
       if (error) throw error;

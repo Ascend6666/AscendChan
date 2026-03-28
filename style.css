@@ -1072,6 +1072,10 @@ textarea {
   max-height: 70vh;
 }
 
+.stream-name-row .select-wrap {
+  margin: 0;
+}
+
 .stream-messages {
   flex: 1;
   overflow-y: auto;
