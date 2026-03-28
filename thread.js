@@ -162,7 +162,9 @@ function renderAuthorLabel(role) {
 
 function renderAliasLabel(alias) {
   if (!alias) return "";
-  return `<span class="post-alias" aria-label="alias">${escapeHtml(alias)}</span>`;
+  const clean = String(alias).replace(/^@+/, "").trim();
+  const formatted = clean ? clean.charAt(0).toUpperCase() + clean.slice(1) : "";
+  return `<span class="post-alias" aria-label="alias">${escapeHtml(formatted)}</span>`;
 }
 
 function postMenuMarkup(postId, posterClientId) {
