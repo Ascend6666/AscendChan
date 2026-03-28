@@ -33,6 +33,9 @@ const dashboardRole = document.getElementById("dashboardRole");
 const roleDescription = document.getElementById("roleDescription");
 const logoutButton = document.getElementById("logoutButton");
 const noticeboardDisplay = document.getElementById("noticeboardDisplay");
+const noticeboardEditor = document.getElementById("noticeboardEditor");
+const noticeboardInput = document.getElementById("noticeboardInput");
+const saveNoticeboard = document.getElementById("saveNoticeboard");
 
 let draftPrefs = loadPreferences();
 
@@ -141,6 +144,12 @@ async function renderNoticeboard() {
   }
 }
 
+function syncNoticeboardEditor() {
+  if (!noticeboardEditor) return;
+  const role = localStorage.getItem(storageKeys.role);
+  noticeboardEditor.classList.toggle("hidden", role !== "admin");
+}
+
 
 customizeToggle.addEventListener("click", () => {
   draftPrefs = loadPreferences();
@@ -201,10 +210,23 @@ logoutButton.addEventListener("click", () => {
   localStorage.removeItem(storageKeys.role);
   dashboardPanel.classList.add("hidden");
   syncSavedLoginState();
+  syncNoticeboardEditor();
+});
+
+saveNoticeboard?.addEventListener("click", () => {
+  if (!noticeboardInput) return;
+  if (localStorage.getItem(storageKeys.role) !== "admin") return;
+  const text = noticeboardInput.value.trim() || "Welcome to Ascend Chan.";
+  window.AscendApi.setNoticeboard(text)
+    .then(renderNoticeboard)
+    .catch(() => {
+      alert("Could not save notice.");
+    });
 });
 
 applyPreferences(draftPrefs);
 syncSavedLoginState();
 renderNoticeboard();
+syncNoticeboardEditor();
 renderBookmarks();
 renderRecentActivity();
