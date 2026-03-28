@@ -167,7 +167,10 @@ function renderAliasLabel(alias) {
   return `<span class="post-alias" aria-label="alias">${escapeHtml(formatted)}</span>`;
 }
 
-function renderMetaLabel(alias) {
+function renderMetaLabel(role, alias) {
+  if (role === "admin") {
+    return `<span class="post-meta-labels"><span class="thread-no">Admin</span></span>`;
+  }
   const aliasLabel = alias ? renderAliasLabel(alias) : "";
   if (aliasLabel) {
     return `<span class="post-meta-labels">${aliasLabel}</span>`;
@@ -232,7 +235,7 @@ async function renderThreadPage() {
     <div class="thread-list">
       <article class="thread-card thread-card-op" id="p-${threadData.opPostId}">
         <div class="thread-card-head">
-          ${renderMetaLabel(threadData.poster_alias)}
+          ${renderMetaLabel(threadData.author_role, threadData.poster_alias)}
           <div class="post-actions">
             ${postMenuMarkup(threadData.opPostId, threadData.poster_client_id)}
             <button class="reply-inline-button" type="button" data-reply-target="${threadData.opPostId}">Reply</button>
@@ -247,7 +250,7 @@ async function renderThreadPage() {
       ${threadData.replies.length ? threadData.replies.map((reply) => `
         <article class="thread-card" id="p-${reply.postId}">
           <div class="thread-card-head">
-            ${renderMetaLabel(reply.poster_alias)}
+            ${renderMetaLabel(reply.author_role, reply.poster_alias)}
             <div class="post-actions">
               ${postMenuMarkup(reply.postId, reply.poster_client_id)}
               <button class="reply-inline-button" type="button" data-reply-target="${reply.postId}">Reply</button>
