@@ -940,6 +940,7 @@ textarea {
   gap: 6px;
   flex-wrap: wrap;
   justify-content: flex-start;
+  margin-left: 0;
 }
 
 body[data-theme="amber-noir"] .post-alias,
