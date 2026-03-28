@@ -353,6 +353,10 @@ textarea {
 .noticeboard-compact {
   margin: 0;
   max-width: none;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .noticeboard-link {
@@ -1089,6 +1093,13 @@ body[data-theme="minimal-dark"] .post-alias {
   word-break: break-word;
   font-size: calc(11px * var(--content-font-scale));
   line-height: 1.18;
+}
+
+.thread-card p strong,
+.thread-card p b,
+.greentext strong {
+  font-weight: 800;
+  font-size: 1.06em;
 }
 
 .thread-card-op {
