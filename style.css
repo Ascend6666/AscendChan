@@ -367,9 +367,51 @@ textarea {
   text-decoration: none;
 }
 
-.noticeboard-placeholder {
-  font-size: calc(11px * var(--content-font-scale));
+
+.code-toggle {
+  border: 1px dashed color-mix(in srgb, var(--line) 70%, transparent);
+  background: color-mix(in srgb, var(--panel-2) 70%, transparent);
+  color: var(--link);
+  font-size: calc(10px * var(--content-font-scale));
+  padding: 2px 6px;
+  cursor: pointer;
+}
+
+.code-block {
+  margin: 6px 0;
+  padding: 6px 8px;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--panel-2) 80%, transparent);
+  font-size: calc(10px * var(--content-font-scale));
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.code-token-keyword {
+  color: #9ad1ff;
+}
+
+.code-token-number {
+  color: #f2c37b;
+}
+
+.code-token-string {
+  color: #b7e38a;
+}
+
+.todo-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.todo-line input {
+  accent-color: var(--link);
+}
+
+.todo-line.is-checked span {
   color: var(--muted);
+  text-decoration: line-through;
 }
 
 .noticeboard-display {

@@ -123,15 +123,53 @@ function escapeHtml(text) {
 }
 
 function renderPostBody(text) {
-  return escapeHtml(text).split("\n").map((line) => {
-    const withLinks = line.replace(/((https?:\/\/)?(?:www\.)?[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(?:\/[^\s<]*)?)/g, (match, url) => {
+  let codeCounter = 0;
+  const lines = escapeHtml(text).split("\n");
+  return lines.map((line) => {
+    const todoMatch = line.match(/^\[( |x|X)\]\s+(.*)$/);
+    let baseLine = line;
+    if (todoMatch) {
+      const checked = todoMatch[1].toLowerCase() === "x";
+      const todoText = todoMatch[2];
+      return `
+        <label class="todo-line${checked ? " is-checked" : ""}">
+          <input type="checkbox" ${checked ? "checked" : ""} />
+          <span>${todoText}</span>
+        </label>
+      `.trim();
+    }
+
+    const withLinks = baseLine.replace(/((https?:\/\/)?(?:www\.)?[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(?:\/[^\s<]*)?)/g, (match, url) => {
       const href = url.startsWith("http://") || url.startsWith("https://") ? url : `https://${url}`;
       return `<a class="quote-link" href="${href}" target="_blank" rel="noopener noreferrer">${url}</a>`;
     });
-    const withQuotes = withLinks.replace(/&gt;&gt;(\d{3})/g, '<a class="quote-link" href="#p-$1">&gt;&gt;$1</a>');
-    if (line.startsWith("&gt;") && !line.startsWith("&gt;&gt;")) return `<span class="greentext">${withQuotes}</span>`;
-    return withQuotes;
+
+    let formatted = withLinks.replace(/&gt;&gt;(\d{3})/g, '<a class="quote-link" href="#p-$1">&gt;&gt;$1</a>');
+
+    formatted = formatted.replace(/``([^`]+)``/g, (_, code) => {
+      const id = `code-${codeCounter++}`;
+      const highlighted = highlightCode(code);
+      return `
+        <button class="code-toggle" type="button" data-code-toggle="${id}">code</button>
+        <pre class="code-block hidden" id="${id}"><code>${highlighted}</code></pre>
+      `;
+    });
+
+    formatted = formatted.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+    formatted = formatted.replace(/_([^_]+)_/g, "<u>$1</u>");
+    formatted = formatted.replace(/\*([^*]+)\*/g, "<em>$1</em>");
+
+    if (baseLine.startsWith("&gt;") && !baseLine.startsWith("&gt;&gt;")) return `<span class="greentext">${formatted}</span>`;
+    return formatted;
   }).join("<br>");
+}
+
+function highlightCode(code) {
+  let html = code;
+  html = html.replace(/(&quot;.*?&quot;|&#39;.*?&#39;)/g, '<span class="code-token-string">$1</span>');
+  html = html.replace(/\b(\d+(\.\d+)?)\b/g, '<span class="code-token-number">$1</span>');
+  html = html.replace(/\b(const|let|var|function|return|if|else|for|while|class|new|await|async|try|catch)\b/g, '<span class="code-token-keyword">$1</span>');
+  return html;
 }
 
 function collectReferences(threadData) {
@@ -360,6 +398,19 @@ replyBody.addEventListener("keydown", (event) => {
 });
 
 document.addEventListener("click", async (event) => {
+  const todoToggle = event.target.closest(".todo-line input");
+  if (todoToggle) {
+    const wrapper = event.target.closest(".todo-line");
+    wrapper?.classList.toggle("is-checked", todoToggle.checked);
+    return;
+  }
+  const codeToggle = event.target.closest("[data-code-toggle]");
+  if (codeToggle) {
+    const target = document.getElementById(codeToggle.dataset.codeToggle);
+    target?.classList.toggle("hidden");
+    return;
+  }
+
   const quoteLink = event.target.closest(".quote-link");
   if (quoteLink) {
     const href = quoteLink.getAttribute("href");
