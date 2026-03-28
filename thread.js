@@ -167,6 +167,21 @@ function renderAliasLabel(alias) {
   return `<span class="post-alias" aria-label="alias">${escapeHtml(formatted)}</span>`;
 }
 
+function renderMetaLabel(role, alias) {
+  const roleLabel = renderAuthorLabel(role);
+  const aliasLabel = alias ? renderAliasLabel(alias) : "";
+  if (roleLabel && aliasLabel) {
+    return `<span class="post-meta-labels"><span class="thread-no">${roleLabel}</span>${aliasLabel}</span>`;
+  }
+  if (roleLabel) {
+    return `<span class="post-meta-labels"><span class="thread-no">${roleLabel}</span></span>`;
+  }
+  if (aliasLabel) {
+    return `<span class="post-meta-labels">${aliasLabel}</span>`;
+  }
+  return `<span class="post-meta-labels"></span>`;
+}
+
 function postMenuMarkup(postId, posterClientId) {
   return `
     <div class="post-menu-wrap">
@@ -224,10 +239,7 @@ async function renderThreadPage() {
     <div class="thread-list">
       <article class="thread-card thread-card-op" id="p-${threadData.opPostId}">
         <div class="thread-card-head">
-          <div class="post-meta">
-            ${renderAuthorLabel(threadData.author_role) ? `<span class="thread-no">${renderAuthorLabel(threadData.author_role)}</span>` : '<span class="thread-no thread-no-empty" aria-hidden="true"></span>'}
-            ${renderAliasLabel(threadData.poster_alias)}
-          </div>
+          ${renderMetaLabel(threadData.author_role, threadData.poster_alias)}
           <div class="post-actions">
             ${postMenuMarkup(threadData.opPostId, threadData.poster_client_id)}
             <button class="reply-inline-button" type="button" data-reply-target="${threadData.opPostId}">Reply</button>
@@ -242,10 +254,7 @@ async function renderThreadPage() {
       ${threadData.replies.length ? threadData.replies.map((reply) => `
         <article class="thread-card" id="p-${reply.postId}">
           <div class="thread-card-head">
-            <div class="post-meta">
-              ${renderAuthorLabel(reply.author_role) ? `<span class="thread-no">${renderAuthorLabel(reply.author_role)}</span>` : '<span class="thread-no thread-no-empty" aria-hidden="true"></span>'}
-              ${renderAliasLabel(reply.poster_alias)}
-            </div>
+            ${renderMetaLabel(reply.author_role, reply.poster_alias)}
             <div class="post-actions">
               ${postMenuMarkup(reply.postId, reply.poster_client_id)}
               <button class="reply-inline-button" type="button" data-reply-target="${reply.postId}">Reply</button>

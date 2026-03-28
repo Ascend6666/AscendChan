@@ -934,13 +934,12 @@ textarea {
   display: block;
 }
 
-.post-meta {
-  display: flex;
+.post-meta-labels {
+  display: inline-flex;
   align-items: center;
   gap: 6px;
   flex-wrap: wrap;
   justify-content: flex-start;
-  margin-left: 0;
 }
 
 body[data-theme="amber-noir"] .post-alias,
