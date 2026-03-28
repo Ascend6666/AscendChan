@@ -1065,9 +1065,7 @@ body[data-theme="minimal-dark"] .post-alias {
   display: grid;
   grid-template-columns: 3fr 1fr;
   gap: 14px;
-  width: min(1200px, 100%);
-  transform: scale(var(--stream-scale, 1));
-  transform-origin: top center;
+  width: 100%;
 }
 
 .stream-layout-toggle {
@@ -1076,18 +1074,6 @@ body[data-theme="minimal-dark"] .post-alias {
   margin-left: auto;
 }
 
-.stream-size-control {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  margin-left: 10px;
-  font-size: calc(9px * var(--content-font-scale));
-  color: var(--muted);
-}
-
-.stream-size-control input {
-  width: 120px;
-}
 
 .stream-player {
   background: var(--panel);
