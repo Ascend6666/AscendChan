@@ -122,7 +122,25 @@ function escapeHtml(text) {
   return text.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#39;");
 }
 
-function renderPostBody(text, ownerClientId) {
+function normalizeTodoState(body, savedState) {
+  const state = {};
+  if (savedState && typeof savedState === "object") {
+    Object.entries(savedState).forEach(([key, value]) => {
+      const index = Number(key);
+      if (Number.isFinite(index)) state[index] = Boolean(value);
+    });
+  }
+  const lines = body.split("\n");
+  lines.forEach((line, index) => {
+    const todoMatch = line.match(/^\s*\[(?:\s*x\s*)?\]\s*(.*)$/i);
+    if (todoMatch && todoMatch[1] && state[index] === undefined) {
+      state[index] = /\[\s*x\s*\]/i.test(line);
+    }
+  });
+  return state;
+}
+
+function renderPostBody(text, ownerClientId, todoState) {
   let codeCounter = 0;
   const lines = escapeHtml(text).split("\n");
   let inTodoBlock = false;
@@ -152,7 +170,8 @@ function renderPostBody(text, ownerClientId) {
     const todoMatch = line.match(/^\s*\[(?:\s*x\s*)?\]\s*(.*)$/i);
     let baseLine = line;
     if (todoMatch && todoMatch[1]) {
-      const checked = /\[\s*x\s*\]/i.test(line);
+      const override = todoState && Object.prototype.hasOwnProperty.call(todoState, index);
+      const checked = override ? Boolean(todoState[index]) : /\[\s*x\s*\]/i.test(line);
       const todoText = todoMatch[1];
       if (!inTodoBlock) {
         inTodoBlock = true;
@@ -225,6 +244,23 @@ function decodeBody(encoded) {
     return decodeURIComponent(escape(window.atob(encoded)));
   } catch {
     return "";
+  }
+}
+
+function encodeTodoState(state) {
+  try {
+    return encodeBody(JSON.stringify(state || {}));
+  } catch {
+    return "";
+  }
+}
+
+function decodeTodoState(encoded) {
+  if (!encoded) return {};
+  try {
+    return JSON.parse(decodeBody(encoded)) || {};
+  } catch {
+    return {};
   }
 }
 
@@ -350,8 +386,8 @@ async function renderThreadPage() {
           </div>
         </div>
         <h3>${escapeHtml(threadData.subject)}</h3>
-        <p class="post-body" data-thread-id="${threadData.id}" data-post-number="1" data-is-op="true" data-body="${encodeBody(threadData.body)}">
-          ${renderPostBody(threadData.body, threadData.poster_client_id)}
+        <p class="post-body" data-thread-id="${threadData.id}" data-post-number="1" data-is-op="true" data-body="${encodeBody(threadData.body)}" data-todo-state="${encodeTodoState(normalizeTodoState(threadData.body, threadData.todo_state))}">
+          ${renderPostBody(threadData.body, threadData.poster_client_id, normalizeTodoState(threadData.body, threadData.todo_state))}
         </p>
         ${renderBacklinks(references, threadData.opPostId)}
       </article>
@@ -366,8 +402,8 @@ async function renderThreadPage() {
               <span class="post-id">${reply.postId}</span>
             </div>
           </div>
-          <p class="post-body" data-thread-id="${threadData.id}" data-post-number="${reply.post_number}" data-is-op="false" data-body="${encodeBody(reply.body)}">
-            ${renderPostBody(reply.body, reply.poster_client_id)}
+          <p class="post-body" data-thread-id="${threadData.id}" data-post-number="${reply.post_number}" data-is-op="false" data-body="${encodeBody(reply.body)}" data-todo-state="${encodeTodoState(normalizeTodoState(reply.body, reply.todo_state))}">
+            ${renderPostBody(reply.body, reply.poster_client_id, normalizeTodoState(reply.body, reply.todo_state))}
           </p>
           ${renderBacklinks(references, reply.postId)}
         </article>
@@ -478,19 +514,20 @@ async function handleTodoToggle(todoToggle) {
     const postBody = block.closest(".post-body");
     const lineIndex = Number(wrapper?.dataset.lineIndex);
     if (postBody && Number.isFinite(lineIndex)) {
-      const encoded = postBody.dataset.body || "";
-      const rawBody = decodeBody(encoded);
-      const updatedBody = toggleTodoLine(rawBody, lineIndex, todoToggle.checked);
+      const encodedState = postBody.dataset.todoState || "";
+      const decodedState = decodeTodoState(encodedState);
+      const updatedState = { ...decodedState, [lineIndex]: todoToggle.checked };
       const threadId = Number(postBody.dataset.threadId);
       const isOp = postBody.dataset.isOp === "true";
       const postNumber = Number(postBody.dataset.postNumber);
       try {
         if (isOp) {
-          await window.AscendApi.updateThreadBody(threadId, updatedBody);
+          const saved = await window.AscendApi.updateThreadTodoState(threadId, updatedState);
+          postBody.dataset.todoState = encodeTodoState(saved || updatedState);
         } else {
-          await window.AscendApi.updatePostBody(threadId, postNumber, updatedBody);
+          const saved = await window.AscendApi.updatePostTodoState(threadId, postNumber, updatedState);
+          postBody.dataset.todoState = encodeTodoState(saved || updatedState);
         }
-        postBody.dataset.body = encodeBody(updatedBody);
         await renderThreadPage();
       } catch (error) {
         alert(error.message || "Could not update checklist.");

@@ -13,6 +13,7 @@ create table if not exists public.threads (
   thread_number integer not null,
   subject text not null,
   body text not null,
+  todo_state jsonb not null default '{}'::jsonb,
   reply_count integer not null default 0,
   author_id uuid,
   author_role text not null default 'anon',
@@ -29,12 +30,16 @@ create table if not exists public.threads (
 alter table public.threads
   add column if not exists poster_alias text;
 
+alter table public.threads
+  add column if not exists todo_state jsonb not null default '{}'::jsonb;
+
 create table if not exists public.posts (
   id bigserial primary key,
   thread_id bigint not null references public.threads(id) on delete cascade,
   board_key text not null references public.boards(key) on delete cascade,
   post_number integer not null,
   body text not null,
+  todo_state jsonb not null default '{}'::jsonb,
   author_id uuid,
   author_role text not null default 'anon',
   poster_client_id text,
@@ -46,6 +51,9 @@ create table if not exists public.posts (
 
 alter table public.posts
   add column if not exists poster_alias text;
+
+alter table public.posts
+  add column if not exists todo_state jsonb not null default '{}'::jsonb;
 
 create table if not exists public.streams (
   id bigserial primary key,

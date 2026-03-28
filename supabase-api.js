@@ -202,6 +202,33 @@
       }
     },
 
+    async updateThreadTodoState(threadId, todoState) {
+      const { data, error } = await supabase
+        .from("threads")
+        .update({ todo_state: todoState, updated_at: new Date().toISOString() })
+        .eq("id", threadId)
+        .select("todo_state");
+      if (error) throw error;
+      if (!data || data.length === 0) {
+        throw new Error("Checklist update blocked. Run SQL policies + reload schema.");
+      }
+      return data[0].todo_state;
+    },
+
+    async updatePostTodoState(threadId, postNumber, todoState) {
+      const { data, error } = await supabase
+        .from("posts")
+        .update({ todo_state: todoState })
+        .eq("thread_id", threadId)
+        .eq("post_number", postNumber)
+        .select("todo_state");
+      if (error) throw error;
+      if (!data || data.length === 0) {
+        throw new Error("Checklist update blocked. Run SQL policies + reload schema.");
+      }
+      return data[0].todo_state;
+    },
+
     async listBookmarks(board) {
       const clientId = window.AscendClient.getClientId();
       const query = supabase
