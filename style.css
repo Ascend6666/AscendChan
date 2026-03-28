@@ -362,6 +362,16 @@ textarea {
   font-size: calc(11px * var(--content-font-scale));
 }
 
+.noticeboard-title-link {
+  color: var(--text);
+  text-decoration: none;
+}
+
+.noticeboard-placeholder {
+  font-size: calc(11px * var(--content-font-scale));
+  color: var(--muted);
+}
+
 .noticeboard-display {
   font-size: calc(11px * var(--content-font-scale));
   color: var(--text);
