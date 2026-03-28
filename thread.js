@@ -162,7 +162,7 @@ function renderAuthorLabel(role) {
 
 function renderAliasLabel(alias) {
   if (!alias) return "";
-  return `<span class="post-alias" aria-label="alias">@${escapeHtml(alias)}</span>`;
+  return `<span class="post-alias" aria-label="alias">${escapeHtml(alias)}</span>`;
 }
 
 function postMenuMarkup(postId, posterClientId) {
