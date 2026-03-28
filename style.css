@@ -910,8 +910,8 @@ textarea {
   min-height: 18px;
   padding: 1px 6px;
   border: 1px solid color-mix(in srgb, var(--line) 72%, transparent);
-  background: color-mix(in srgb, var(--panel-2) 55%, transparent);
-  color: color-mix(in srgb, var(--header-text) 85%, var(--muted) 15%);
+  background: color-mix(in srgb, var(--panel-2) 60%, transparent);
+  color: color-mix(in srgb, var(--header-text) 88%, var(--muted) 12%);
   font-size: calc(9px * var(--content-font-scale));
   letter-spacing: 0.02em;
   line-height: 1;
@@ -935,10 +935,37 @@ textarea {
 }
 
 .post-meta {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 6px;
   flex-wrap: wrap;
+  justify-content: flex-start;
+}
+
+body[data-theme="amber-noir"] .post-alias,
+body[data-theme="retro-terminal"] .post-alias {
+  background: color-mix(in srgb, #cfa24b 18%, var(--panel-2) 82%);
+  color: color-mix(in srgb, #f7d483 70%, var(--header-text) 30%);
+}
+
+body[data-theme="mist-blue"] .post-alias {
+  background: color-mix(in srgb, #8ec5ff 18%, var(--panel-2) 82%);
+  color: color-mix(in srgb, #b6dbff 70%, var(--header-text) 30%);
+}
+
+body[data-theme="blush-pink"] .post-alias {
+  background: color-mix(in srgb, #ff9fb1 18%, var(--panel-2) 82%);
+  color: color-mix(in srgb, #ffc2cf 70%, var(--header-text) 30%);
+}
+
+body[data-theme="violet-haze"] .post-alias {
+  background: color-mix(in srgb, #b6a1ff 18%, var(--panel-2) 82%);
+  color: color-mix(in srgb, #d6ccff 70%, var(--header-text) 30%);
+}
+
+body[data-theme="minimal-dark"] .post-alias {
+  background: color-mix(in srgb, #8bd7ff 18%, var(--panel-2) 82%);
+  color: color-mix(in srgb, #bde9ff 70%, var(--header-text) 30%);
 }
 
 .thread-card h3 {
@@ -1040,6 +1067,19 @@ textarea {
   margin-left: auto;
 }
 
+.stream-size-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 10px;
+  font-size: calc(9px * var(--content-font-scale));
+  color: var(--muted);
+}
+
+.stream-size-control input {
+  width: 120px;
+}
+
 .stream-player {
   background: var(--panel);
   border: 1px solid var(--line);
@@ -1060,6 +1100,8 @@ textarea {
   aspect-ratio: 16 / 9;
   display: grid;
   place-items: center;
+  transform: scale(var(--stream-scale, 1));
+  transform-origin: top left;
 }
 
 .stream-frame > div,

@@ -11,6 +11,17 @@ const pauseButton = document.getElementById("pauseButton");
 const syncButton = document.getElementById("syncButton");
 const layoutNormalButton = document.getElementById("layoutNormalButton");
 const layoutTheaterButton = document.getElementById("layoutTheaterButton");
+const streamSizeRange = document.getElementById("streamSizeRange");
+
+const storageKeys = {
+  theme: "ascendchan-theme",
+  font: "ascendchan-font",
+  fontWeight: "ascendchan-font-weight",
+  fontSize: "ascendchan-font-size",
+};
+
+const defaultPrefs = { theme: "classic-olive", font: "tahoma", fontWeight: "regular", fontSize: 100 };
+const body = document.body;
 
 let streamData = null;
 let player = null;
@@ -20,6 +31,7 @@ let lastMessageCount = 0;
 let lockedDisplayName = "";
 let scheduleTimer = null;
 let layoutMode = "normal";
+let streamSize = 100;
 
 function getStreamId() {
   const params = new URLSearchParams(window.location.search);
@@ -72,6 +84,14 @@ function applyLayout(mode) {
   layoutTheaterButton?.classList.toggle("primary-button", layoutMode === "theater");
   if (streamData) {
     localStorage.setItem(`ascendchan-stream-layout:${streamData.id}`, layoutMode);
+  }
+}
+
+function applySize(value) {
+  streamSize = Math.max(70, Math.min(100, Number(value) || 100));
+  document.documentElement.style.setProperty("--stream-scale", String(streamSize / 100));
+  if (streamData) {
+    localStorage.setItem(`ascendchan-stream-size:${streamData.id}`, String(streamSize));
   }
 }
 
@@ -221,8 +241,14 @@ syncButton?.addEventListener("click", async () => {
 
 loadStream()
   .then(async () => {
+    applyPreferences(loadPreferences());
     const savedLayout = localStorage.getItem(`ascendchan-stream-layout:${getStreamId()}`) || "normal";
     applyLayout(savedLayout);
+    const savedSize = Number(localStorage.getItem(`ascendchan-stream-size:${getStreamId()}`) || 100);
+    applySize(savedSize);
+    if (streamSizeRange) {
+      streamSizeRange.value = String(savedSize);
+    }
     if (streamDisplayName) {
       const saved = localStorage.getItem(`ascendchan-stream-name:${getStreamId()}`) || "";
       streamDisplayName.value = saved;
@@ -258,3 +284,19 @@ window.addEventListener("beforeunload", () => {
 
 layoutNormalButton?.addEventListener("click", () => applyLayout("normal"));
 layoutTheaterButton?.addEventListener("click", () => applyLayout("theater"));
+streamSizeRange?.addEventListener("input", (event) => applySize(event.target.value));
+function loadPreferences() {
+  return {
+    theme: localStorage.getItem(storageKeys.theme) || defaultPrefs.theme,
+    font: localStorage.getItem(storageKeys.font) || defaultPrefs.font,
+    fontWeight: localStorage.getItem(storageKeys.fontWeight) || defaultPrefs.fontWeight,
+    fontSize: Number(localStorage.getItem(storageKeys.fontSize)) || defaultPrefs.fontSize,
+  };
+}
+
+function applyPreferences(preferences) {
+  body.dataset.theme = preferences.theme;
+  body.dataset.font = preferences.font;
+  body.dataset.fontWeight = preferences.fontWeight;
+  body.style.setProperty("--content-font-scale", String(preferences.fontSize / 100));
+}
