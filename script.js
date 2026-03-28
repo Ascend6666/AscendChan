@@ -32,6 +32,10 @@ const loginStatus = document.getElementById("loginStatus");
 const dashboardRole = document.getElementById("dashboardRole");
 const roleDescription = document.getElementById("roleDescription");
 const logoutButton = document.getElementById("logoutButton");
+const noticeboardDisplay = document.getElementById("noticeboardDisplay");
+const noticeboardEditor = document.getElementById("noticeboardEditor");
+const noticeboardInput = document.getElementById("noticeboardInput");
+const saveNoticeboard = document.getElementById("saveNoticeboard");
 
 let draftPrefs = loadPreferences();
 
@@ -97,6 +101,7 @@ function unlockDashboard(role) {
   loginStatus.textContent = `${role} login successful.`;
   passwordInput.value = "";
   syncSavedLoginState();
+  syncNoticeboardEditor();
 }
 
 async function renderBookmarks() {
@@ -124,6 +129,25 @@ async function renderRecentActivity() {
 function syncSavedLoginState() {
   const savedRole = localStorage.getItem(storageKeys.role);
   loginToggle.textContent = savedRole === "admin" ? "Admin" : savedRole === "developer" ? "Developer" : "Login";
+}
+
+async function renderNoticeboard() {
+  if (!noticeboardDisplay) return;
+  noticeboardDisplay.textContent = "Loading notice...";
+  try {
+    const data = await window.AscendApi.getNoticeboard();
+    const text = data?.body || "Welcome to Ascend Chan.";
+    noticeboardDisplay.textContent = text;
+    if (noticeboardInput) noticeboardInput.value = text;
+  } catch {
+    noticeboardDisplay.textContent = "Welcome to Ascend Chan.";
+  }
+}
+
+function syncNoticeboardEditor() {
+  if (!noticeboardEditor) return;
+  const role = localStorage.getItem(storageKeys.role);
+  noticeboardEditor.classList.toggle("hidden", role !== "admin");
 }
 
 customizeToggle.addEventListener("click", () => {
@@ -185,9 +209,23 @@ logoutButton.addEventListener("click", () => {
   localStorage.removeItem(storageKeys.role);
   dashboardPanel.classList.add("hidden");
   syncSavedLoginState();
+  syncNoticeboardEditor();
+});
+
+saveNoticeboard?.addEventListener("click", () => {
+  if (!noticeboardInput) return;
+  if (localStorage.getItem(storageKeys.role) !== "admin") return;
+  const text = noticeboardInput.value.trim() || "Welcome to Ascend Chan.";
+  window.AscendApi.setNoticeboard(text)
+    .then(renderNoticeboard)
+    .catch(() => {
+      alert("Could not save notice.");
+    });
 });
 
 applyPreferences(draftPrefs);
 syncSavedLoginState();
+renderNoticeboard();
+syncNoticeboardEditor();
 renderBookmarks();
 renderRecentActivity();

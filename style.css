@@ -336,7 +336,28 @@ textarea {
   transform: translateX(-50%);
   width: min(100%, 1400px);
   text-align: center;
-  pointer-events: none;
+  pointer-events: auto;
+}
+
+.noticeboard {
+  margin: 10px auto 0;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  box-shadow: inset 0 1px 0 var(--panel-edge);
+  max-width: 360px;
+}
+
+.noticeboard-display {
+  font-size: calc(11px * var(--content-font-scale));
+  color: var(--text);
+  white-space: pre-line;
+}
+
+.noticeboard-editor {
+  margin-top: 8px;
+  display: grid;
+  gap: 8px;
 }
 
 .brand-lockup {

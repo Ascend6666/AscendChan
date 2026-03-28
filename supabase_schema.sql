@@ -78,6 +78,36 @@ create table if not exists public.stream_state (
   updated_by text
 );
 
+create table if not exists public.noticeboard (
+  id integer primary key,
+  body text not null,
+  updated_at timestamptz not null default now()
+);
+
+alter table public.noticeboard enable row level security;
+
+drop policy if exists "noticeboard is readable" on public.noticeboard;
+create policy "noticeboard is readable"
+on public.noticeboard
+for select
+to anon, authenticated
+using (true);
+
+drop policy if exists "noticeboard can insert" on public.noticeboard;
+create policy "noticeboard can insert"
+on public.noticeboard
+for insert
+to anon, authenticated
+with check (true);
+
+drop policy if exists "noticeboard can update" on public.noticeboard;
+create policy "noticeboard can update"
+on public.noticeboard
+for update
+to anon, authenticated
+using (true)
+with check (true);
+
 create index if not exists stream_status_schedule_idx on public.streams (status, scheduled_at);
 create index if not exists stream_messages_stream_idx on public.stream_messages (stream_id, created_at desc);
 

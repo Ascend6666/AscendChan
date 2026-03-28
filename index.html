@@ -6,7 +6,6 @@
     <title>Ascend Chan</title>
     <link rel="icon" href="favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="style.css" />
-    <script defer src="https://cdn.vercel-insights.com/v1/script.js"></script>
   </head>
   <body data-theme="classic-olive" data-font="tahoma">
     <main class="page">
@@ -23,6 +22,18 @@
               <span class="crosshair-center"></span>
             </span>
             <h1 class="site-title">Ascend<br />Chan</h1>
+          </div>
+          <div class="noticeboard" aria-label="Noticeboard">
+            <div class="noticeboard-display" id="noticeboardDisplay"></div>
+            <div class="noticeboard-editor hidden" id="noticeboardEditor">
+              <label class="select-wrap" for="noticeboardInput">
+                <span>Admin notice</span>
+                <textarea id="noticeboardInput" rows="3" placeholder="Write a notice for everyone..."></textarea>
+              </label>
+              <button class="utility-button primary-button" type="button" id="saveNoticeboard">
+                Save notice
+              </button>
+            </div>
           </div>
         </div>
 

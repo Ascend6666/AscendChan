@@ -270,6 +270,21 @@
       if (error) throw error;
     },
 
+    async getNoticeboard() {
+      const { data, error } = await supabase.from("noticeboard").select("*").eq("id", 1).maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+
+    async setNoticeboard(body) {
+      const { error } = await supabase.from("noticeboard").upsert({
+        id: 1,
+        body,
+        updated_at: new Date().toISOString(),
+      });
+      if (error) throw error;
+    },
+
     async listStreamMessages(streamId, limit = 80) {
       const { data, error } = await supabase
         .from("stream_messages")
