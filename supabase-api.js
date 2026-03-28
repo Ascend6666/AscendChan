@@ -250,6 +250,14 @@
       return data;
     },
 
+    async updateStreamStatus(id, status) {
+      const { error } = await supabase
+        .from("streams")
+        .update({ status })
+        .eq("id", id);
+      if (error) throw error;
+    },
+
     async listStreamMessages(streamId, limit = 80) {
       const { data, error } = await supabase
         .from("stream_messages")

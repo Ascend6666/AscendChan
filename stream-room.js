@@ -16,6 +16,7 @@ let pollTimer = null;
 let hostHeartbeat = null;
 let lastMessageCount = 0;
 let lockedDisplayName = "";
+let scheduleTimer = null;
 
 function getStreamId() {
   const params = new URLSearchParams(window.location.search);
@@ -48,6 +49,11 @@ function initPlayer(videoId) {
     events: {
       onStateChange: async (event) => {
         if (!isHost()) return;
+        if (isScheduledLocked()) {
+          player.pauseVideo();
+          player.seekTo(0, true);
+          return;
+        }
         if (event.data === window.YT.PlayerState.PLAYING || event.data === window.YT.PlayerState.PAUSED) {
           await broadcastState();
         }
@@ -82,6 +88,35 @@ async function loadStream() {
   } else {
     window.onYouTubeIframeAPIReady = () => initPlayer(streamData.youtube_id);
   }
+}
+
+function isScheduledLocked() {
+  if (!streamData?.scheduled_at) return false;
+  if (streamData.status === "live") return false;
+  return Date.now() < new Date(streamData.scheduled_at).getTime();
+}
+
+function updateScheduleUi() {
+  if (!streamData?.scheduled_at) return;
+  const startMs = new Date(streamData.scheduled_at).getTime();
+  const diff = startMs - Date.now();
+  if (diff <= 0) {
+    streamStatusBadge.textContent = "live";
+    streamScheduleText.textContent = "live";
+    streamData.status = "live";
+    if (isHost()) {
+      window.AscendApi.updateStreamStatus(streamData.id, "live").catch(() => {});
+    }
+    if (scheduleTimer) {
+      window.clearInterval(scheduleTimer);
+      scheduleTimer = null;
+    }
+    return;
+  }
+  const minutes = Math.floor(diff / 60000);
+  const seconds = Math.floor((diff % 60000) / 1000);
+  streamStatusBadge.textContent = "scheduled";
+  streamScheduleText.textContent = `starts in ${minutes}m ${seconds}s`;
 }
 
 async function refreshMessages() {
@@ -152,12 +187,17 @@ streamChatInput?.addEventListener("keydown", (event) => {
 
 playButton?.addEventListener("click", async () => {
   if (!player) return;
+  if (isScheduledLocked()) {
+    alert("Stream is scheduled. Please wait until it goes live.");
+    return;
+  }
   player.playVideo();
   await broadcastState();
 });
 
 pauseButton?.addEventListener("click", async () => {
   if (!player) return;
+  if (isScheduledLocked()) return;
   player.pauseVideo();
   await broadcastState();
 });
@@ -177,6 +217,10 @@ loadStream()
       }
     }
     await refreshMessages();
+    updateScheduleUi();
+    if (streamData?.scheduled_at) {
+      scheduleTimer = window.setInterval(updateScheduleUi, 1000);
+    }
     pollTimer = window.setInterval(async () => {
       await refreshMessages();
       await refreshState();
@@ -194,4 +238,5 @@ loadStream()
 window.addEventListener("beforeunload", () => {
   if (pollTimer) window.clearInterval(pollTimer);
   if (hostHeartbeat) window.clearInterval(hostHeartbeat);
+  if (scheduleTimer) window.clearInterval(scheduleTimer);
 });
