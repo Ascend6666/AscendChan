@@ -514,7 +514,7 @@ bookmarkToggle.addEventListener("click", async () => {
   }
 });
 replyBody.addEventListener("keydown", (event) => {
-  if (event.key === "Enter" && !event.shiftKey) {
+  if (event.key === "Enter" && event.ctrlKey) {
     event.preventDefault();
     createReply();
   }

@@ -375,13 +375,13 @@ threadFilter.addEventListener("change", renderThreads);
 toggleComposer.addEventListener("click", () => threadComposer.classList.toggle("hidden"));
 postThreadButton.addEventListener("click", createThread);
 threadSubject.addEventListener("keydown", (event) => {
-  if (event.key === "Enter" && !event.shiftKey) {
+  if (event.key === "Enter" && event.ctrlKey) {
     event.preventDefault();
     createThread();
   }
 });
 threadBody.addEventListener("keydown", (event) => {
-  if (event.key === "Enter" && !event.shiftKey) {
+  if (event.key === "Enter" && event.ctrlKey) {
     event.preventDefault();
     createThread();
   }
