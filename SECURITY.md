@@ -2,7 +2,7 @@
 
 ## Supported Use
 
-This project is currently best treated as an experimental or self-hosted community app template.
+This project is currently best treated as an experimental textboard forum website.
 
 ## Reporting a Vulnerability
 
@@ -11,9 +11,9 @@ Please report security issues privately to the maintainer instead of opening a p
 When reporting, include:
 
 - A short description of the issue
-- Steps to reproduce
+- Steps to reapply
 - Impact
-- Any suggested mitigation
+- Anyother suggested
 
 ## Current Security Caveats
 

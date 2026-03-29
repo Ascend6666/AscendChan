@@ -23,6 +23,8 @@ const resetPreferences = document.getElementById("resetPreferences");
 const themeButtons = document.querySelectorAll("[data-theme-option]");
 const fontWeightButtons = document.querySelectorAll("[data-font-weight]");
 const donationGrid = document.getElementById("donationGrid");
+const guideToggle = document.getElementById("guideToggle");
+const guidePanel = document.getElementById("guidePanel");
 
 let draftPrefs = loadPreferences();
 
@@ -72,27 +74,38 @@ function escapeHtml(value) {
 function renderDonationMethods() {
   const methods = Array.isArray(window.AscendConfig?.donations) ? window.AscendConfig.donations : [];
   if (!methods.length) {
-    donationGrid.innerHTML = '<p class="empty-state">No donation methods configured yet. Add your UPI or payment link details in local-config.js.</p>';
+    donationGrid.innerHTML = '<p class="empty-state">No donation methods configured yet. Add your Monero wallet details in local-config.js.</p>';
     return;
   }
 
   donationGrid.innerHTML = methods
     .map((method, index) => `
       <article class="dashboard-card donation-card">
-        <div class="donation-card-head">
-          <div>
-            <h3>${escapeHtml(method.label || "Donation method")}</h3>
-            <p class="donation-meta">${escapeHtml(method.network || "support option")}</p>
+        <div class="donation-card-layout">
+          <div class="donation-card-copy">
+            <div class="donation-card-head">
+              <div>
+                <h3>${escapeHtml(method.label || "Donation method")}</h3>
+                <p class="donation-meta">${escapeHtml(method.network || "private donation")}</p>
+              </div>
+              ${method.recommended ? '<span class="donation-badge">recommended</span>' : ""}
+            </div>
+            <p class="donation-note">${escapeHtml(method.note || "Use the address below exactly as shown.")}</p>
+            <label class="select-wrap donation-address-wrap" for="donationAddress${index}">
+              <span>Wallet</span>
+              <textarea id="donationAddress${index}" rows="4" readonly>${escapeHtml(method.address || "")}</textarea>
+            </label>
+            <div class="composer-actions donation-actions">
+              <button class="utility-button" type="button" data-copy-donation="${index}">Copy wallet</button>
+              <a class="utility-button primary-button" href="${escapeHtml(method.uri || `monero:${method.address || ""}`)}">Open in wallet</a>
+            </div>
           </div>
-          ${method.recommended ? '<span class="donation-badge">recommended</span>' : ""}
-        </div>
-        <p class="donation-note">${escapeHtml(method.note || "Use the address below exactly as shown.")}</p>
-        <label class="select-wrap donation-address-wrap" for="donationAddress${index}">
-          <span>Details</span>
-          <textarea id="donationAddress${index}" rows="3" readonly>${escapeHtml(method.address || "")}</textarea>
-        </label>
-        <div class="composer-actions">
-          <button class="utility-button" type="button" data-copy-donation="${index}">Copy details</button>
+          ${method.qrImage ? `
+            <div class="donation-qr-block">
+              <img class="donation-qr-image" src="${escapeHtml(method.qrImage)}" alt="${escapeHtml(method.label || "Donation")} QR code" />
+              <p class="donation-qr-note">Scan this QR code in your Monero wallet app.</p>
+            </div>
+          ` : ""}
         </div>
       </article>
     `)
@@ -146,6 +159,10 @@ document.querySelectorAll("[data-close-panel]").forEach((button) => {
   });
 });
 
+guideToggle?.addEventListener("click", () => {
+  guidePanel?.classList.toggle("hidden");
+});
+
 document.addEventListener("click", async (event) => {
   const copyButton = event.target.closest("[data-copy-donation]");
   if (!copyButton) return;
@@ -159,12 +176,12 @@ document.addEventListener("click", async (event) => {
     await navigator.clipboard.writeText(address);
     copyButton.textContent = "Copied";
     window.setTimeout(() => {
-      copyButton.textContent = "Copy details";
+      copyButton.textContent = "Copy wallet";
     }, 1200);
   } catch {
     copyButton.textContent = "Copy failed";
     window.setTimeout(() => {
-      copyButton.textContent = "Copy details";
+      copyButton.textContent = "Copy wallet";
     }, 1200);
   }
 });

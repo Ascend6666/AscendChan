@@ -52,9 +52,34 @@
       </section>
 
       <section class="thread-page-panel">
-        <div class="section-title">Support options</div>
+        <div class="section-title donate-section-title">
+          <span>Anonymous-friendly option</span>
+          <button class="utility-button donate-guide-toggle" type="button" id="guideToggle">
+            Guidelines
+          </button>
+        </div>
         <div class="donation-grid" id="donationGrid">
           <p class="empty-state">No donation methods configured yet.</p>
+        </div>
+        <div class="composer-grid donate-guide hidden" id="guidePanel">
+          <p>
+            If you are in India and only have UPI, the flow is usually not direct UPI to Monero.
+            Most people need to move from INR to a crypto platform first, then buy or swap into
+            Monero, and finally send Monero to the wallet shown above.
+          </p>
+          <ol class="donate-steps">
+            <li>Open a crypto platform that lets you add INR and supports Monero or Monero withdrawals.</li>
+            <li>Add money using UPI or bank transfer.</li>
+            <li>Buy Monero directly if the platform supports it.</li>
+            <li>If Monero is not available, buy a supported coin and convert or swap it to Monero.</li>
+            <li>Copy the Monero wallet address from this page exactly.</li>
+            <li>Withdraw or send the Monero to that wallet address.</li>
+            <li>Double-check the address before confirming, because crypto transfers usually cannot be reversed.</li>
+          </ol>
+          <p class="donate-privacy-note">
+            Platform support changes often. If one app does not support Monero, try another compliant
+            option. For most people, this takes more effort than a normal UPI payment.
+          </p>
         </div>
       </section>
     </main>

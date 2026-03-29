@@ -39,11 +39,11 @@ window.AscendConfig = {
 };
 ```
 
-`local-config.js` is gitignored, so your local credentials stay out of the repo.
+`local-config.js` is gitignored, so it is limited to local testing.
 
 ### 3. Serve the files
 
-This is a static project, so any simple local server will do. Personally, I use :
+This is a static project, so any simple local server will do. Personally, I use git bash :
 
 ```git bash
 cd Project //Locate the project
@@ -69,9 +69,9 @@ Then check on which port the site is hosted then open `http://localhost:port`.
 
 This repo is safe to publish now, but it is still important to be honest about what this project is.
 
-The admin password flow is only a local browser-side convenience. It is not real authentication. If you want production-grade moderation or role enforcement, that needs to be handled properly on the backend and through stricter Supabase policies.
+The admin password flow is only a local browser-side convenience. It is not real authentication. If you want real moderation or roleplay :), that needs to be handled properly on the backend and through stricter Supabase policies.
 
-Also, the Supabase anon key is public by design, so the real protection comes from your Row Level Security rules. Before deploying this publicly, review and harden the policies in `supabase_schema.sql`.
+Before deploying this publicly, review and harden the policies in `supabase_schema.sql`.
 
 ## Contributing
 

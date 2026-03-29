@@ -7,17 +7,13 @@ window.AscendConfig = {
   },
   donations: [
     {
-      label: "UPI",
-      network: "India",
-      address: "add-your-upi-id-here",
-      note: "Donate directly using your UPI app.",
+      label: "Monero",
+      network: "XMR",
+      address: "46Lbbmdu3PWRgwbTEHP47VYX6G26f9hSkYSbhaaDEMBN4wUoahTg3pFPHJdiestvYZ4rxk2LnEUtp4A1BYJ1fJLR9qaaC1h",
+      uri: "monero:46Lbbmdu3PWRgwbTEHP47VYX6G26f9hSkYSbhaaDEMBN4wUoahTg3pFPHJdiestvYZ4rxk2LnEUtp4A1BYJ1fJLR9qaaC1h",
+      qrImage: "monero-qr.png",
+      note: "Scan the QR or copy the wallet address to donate directly in Monero.",
       recommended: true,
-    },
-    {
-      label: "Payment Link",
-      network: "Razorpay",
-      address: "add-your-payment-link-here",
-      note: "Use this if you prefer a hosted checkout page.",
     },
   ],
 };
