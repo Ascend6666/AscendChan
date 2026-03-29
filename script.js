@@ -116,7 +116,7 @@ async function renderRecentActivity() {
   try {
     const activity = await window.AscendApi.listRecentThreads(8);
     recentList.innerHTML = activity.length
-      ? activity.map((entry) => `<a href="thread.html?board=${entry.board_key}&thread=${entry.thread_number}">/${entry.board_key}/ No.${entry.thread_number} ${entry.subject}</a>`).join("")
+      ? activity.map((entry) => `<a href="thread.html?board=${entry.board_key}&thread=${entry.thread_number}">/${entry.board_key}/ ${entry.subject}</a>`).join("")
       : '<p class="empty-state">No Recent Activity :(</p>';
   } catch {
     recentList.innerHTML = '<p class="empty-state">Could not load recent activity.</p>';
