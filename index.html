@@ -182,7 +182,7 @@
       <div class="panel-header">
         <div>
           <h2 id="loginTitle">Developer / Admin Login</h2>
-          <p>Password only. This area is restricted.</p>
+          <p>Use your Supabase account. Admin tools unlock from your stored role.</p>
         </div>
         <button class="close-button" type="button" data-close-panel="loginPanel">
           x
@@ -190,13 +190,17 @@
       </div>
 
       <form class="login-form" id="loginForm">
+        <label class="select-wrap" for="emailInput">
+          <span>Email</span>
+          <input id="emailInput" type="email" autocomplete="username" />
+        </label>
         <label class="select-wrap" for="passwordInput">
           <span>Password</span>
           <input id="passwordInput" type="password" autocomplete="current-password" />
         </label>
         <button class="utility-button primary-button" type="submit">Enter dashboard</button>
         <p class="login-note" id="loginStatus">
-          Use developer or admin password to unlock moderation tools.
+          Sign in with the account whose profile role is set to developer or admin.
         </p>
       </form>
     </aside>
@@ -311,7 +315,6 @@ fake invite</textarea>
       }
     </script>
     <script src="public-config.js"></script>
-    <script src="local-config.js" onerror="window.AscendLocalConfig=window.AscendLocalConfig||{};"></script>
     <script src="supabase.js"></script>
     <script src="supabase-api.js"></script>
     <script src="reset.js"></script>

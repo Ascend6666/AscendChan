@@ -396,5 +396,86 @@
       });
       if (error) throw error;
     },
+
+    async listAdminThreads(board) {
+      const { data, error } = await supabase
+        .from("threads")
+        .select("*")
+        .eq("board_key", board)
+        .order("pinned", { ascending: false })
+        .order("updated_at", { ascending: false });
+      if (error) throw error;
+      return data || [];
+    },
+
+    async setThreadFlags(board, threadNumber, updates) {
+      const thread = await fetchThreadRow(board, threadNumber);
+      if (!thread) throw new Error("Thread not found");
+
+      const { error } = await supabase
+        .from("threads")
+        .update({
+          ...updates,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", thread.id);
+      if (error) throw error;
+    },
+
+    async listReports() {
+      const { data, error } = await supabase
+        .from("reports")
+        .select("id, board_key, thread_id, target_post_number, target_poster_client_id, reason, status, created_at, threads(thread_number, subject)")
+        .eq("status", "open")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data || [];
+    },
+
+    async resolveReport(reportId) {
+      const { error } = await supabase
+        .from("reports")
+        .update({ status: "resolved" })
+        .eq("id", reportId);
+      if (error) throw error;
+    },
+
+    async clearResolvedReports() {
+      const { error } = await supabase
+        .from("reports")
+        .delete()
+        .eq("status", "resolved");
+      if (error) throw error;
+    },
+
+    async listBans() {
+      const { data, error } = await supabase
+        .from("bans")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data || [];
+    },
+
+    async applyBan(targetPosterClientId, type, minutes) {
+      const payload = {
+        target_poster_client_id: targetPosterClientId,
+        ban_type: type,
+      };
+      if (type === "temporary") {
+        payload.expires_at = new Date(Date.now() + minutes * 60 * 1000).toISOString();
+      }
+
+      const { error } = await supabase.from("bans").insert(payload);
+      if (error) throw error;
+    },
+
+    async removeBan(banId) {
+      const { error } = await supabase
+        .from("bans")
+        .delete()
+        .eq("id", banId);
+      if (error) throw error;
+    },
   };
 })();

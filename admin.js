@@ -4,12 +4,6 @@ const storageKeys = {
   fontWeight: "ascendchan-font-weight",
   fontSize: "ascendchan-font-size",
   role: "ascendchan-role",
-  threads: "ascendchan-threads",
-  reports: "ascendchan-reports",
-  bookmarks: "ascendchan-bookmarks",
-  bans: "ascendchan-bans",
-  moderation: "ascendchan-moderation",
-  spamState: "ascendchan-spam-state",
 };
 
 const defaultPrefs = {
@@ -18,6 +12,8 @@ const defaultPrefs = {
   fontWeight: "regular",
   fontSize: 100,
 };
+
+const boardKeys = ["mind", "body", "study", "skill", "grind", "social", "tech", "exam", "meta"];
 
 const body = document.body;
 const customizePanel = document.getElementById("customizePanel");
@@ -55,17 +51,16 @@ const adminActionNotice = document.getElementById("adminActionNotice");
 
 let draftPrefs = loadPreferences();
 let actionNoticeTimeout;
-
-if (sessionStorage.getItem(storageKeys.role) !== "admin") {
-  window.location.href = "index.html";
-}
+let currentThreadRows = [];
+let currentThreadDetail = null;
+let currentReports = [];
+let currentBans = [];
 
 function loadPreferences() {
   return {
     theme: localStorage.getItem(storageKeys.theme) || defaultPrefs.theme,
     font: localStorage.getItem(storageKeys.font) || defaultPrefs.font,
-    fontWeight:
-      localStorage.getItem(storageKeys.fontWeight) || defaultPrefs.fontWeight,
+    fontWeight: localStorage.getItem(storageKeys.fontWeight) || defaultPrefs.fontWeight,
     fontSize: Number(localStorage.getItem(storageKeys.fontSize)) || defaultPrefs.fontSize,
   };
 }
@@ -95,248 +90,36 @@ function persistPreferences(preferences) {
   localStorage.setItem(storageKeys.fontSize, String(preferences.fontSize));
 }
 
-function loadThreads() {
-  try {
-    return JSON.parse(localStorage.getItem(storageKeys.threads)) || {};
-  } catch {
-    return {};
-  }
+function getSelectedThreadRow() {
+  return currentThreadRows.find((thread) => Number(thread.thread_number) === Number(adminThreadSelect.value)) || null;
 }
 
-function saveThreads(threadMap) {
-  localStorage.setItem(storageKeys.threads, JSON.stringify(threadMap));
-}
-
-function loadReports() {
-  try {
-    return JSON.parse(localStorage.getItem(storageKeys.reports)) || [];
-  } catch {
-    return [];
-  }
-}
-
-function saveReports(reportList) {
-  localStorage.setItem(storageKeys.reports, JSON.stringify(reportList));
-}
-
-function loadBookmarks() {
-  try {
-    return JSON.parse(localStorage.getItem(storageKeys.bookmarks)) || {};
-  } catch {
-    return {};
-  }
-}
-
-function saveBookmarks(bookmarkMap) {
-  localStorage.setItem(storageKeys.bookmarks, JSON.stringify(bookmarkMap));
-}
-
-function loadBans() {
-  try {
-    return JSON.parse(localStorage.getItem(storageKeys.bans)) || {};
-  } catch {
-    return {};
-  }
-}
-
-function saveBans(banMap) {
-  localStorage.setItem(storageKeys.bans, JSON.stringify(banMap));
-}
-
-function loadModeration() {
-  try {
-    return JSON.parse(localStorage.getItem(storageKeys.moderation)) || {};
-  } catch {
-    return {};
-  }
-}
-
-function saveModeration(state) {
-  localStorage.setItem(storageKeys.moderation, JSON.stringify(state));
-}
-
-function getBoardThreads(board) {
-  const threadMap = loadThreads();
-  return Array.isArray(threadMap[board]) ? threadMap[board] : [];
-}
-
-function getSelectedThreadRef() {
-  const board = adminBoardSelect.value;
-  const threadId = Number(adminThreadSelect.value);
-  if (!threadId) {
-    return null;
-  }
-
-  const threadMap = loadThreads();
-  const boardThreads = Array.isArray(threadMap[board]) ? threadMap[board] : [];
-  const thread = boardThreads.find((entry) => Number(entry.threadId) === threadId);
-  if (!thread) {
-    return null;
-  }
-
-  return { board, threadId, thread, threadMap, boardThreads };
-}
-
-function getSelectedPostRef() {
-  const selectedThread = getSelectedThreadRef();
-  if (!selectedThread) {
-    return null;
-  }
-
-  const postId = adminPostSelect.value;
-  if (!postId) {
-    return null;
-  }
-
-  if (postId === selectedThread.thread.opPostId) {
-    return {
-      ...selectedThread,
-      postId,
-      post: {
-        postId,
-        authorId: selectedThread.thread.authorId || "unknown",
-        isOp: true,
-      },
-    };
-  }
-
-  const reply = Array.isArray(selectedThread.thread.replies)
-    ? selectedThread.thread.replies.find((entry) => entry.postId === postId)
-    : null;
-  if (!reply) {
-    return null;
-  }
-
-  return {
-    ...selectedThread,
-    postId,
-    post: {
-      ...reply,
-      isOp: false,
-    },
-  };
+function getSelectedReply() {
+  if (!currentThreadDetail) return null;
+  const selectedPost = adminPostSelect.value;
+  if (!selectedPost || selectedPost === "op") return null;
+  return (currentThreadDetail.replies || []).find((reply) => String(reply.post_number) === selectedPost) || null;
 }
 
 function syncThreadStateLabel() {
-  const selected = getSelectedThreadRef();
-  if (!selected) {
+  const thread = getSelectedThreadRow();
+  if (!thread) {
     adminThreadState.textContent = "No thread selected.";
     banTargetInput.value = "";
     return;
   }
 
   const labels = [];
-  if (selected.thread.pinned) {
-    labels.push("pinned");
-  }
-  if (selected.thread.locked) {
-    labels.push("locked");
-  }
-  if (selected.thread.archived) {
-    labels.push("archived");
-  }
+  if (thread.pinned) labels.push("pinned");
+  if (thread.locked) labels.push("locked");
+  if (thread.archived) labels.push("archived");
   adminThreadState.textContent = labels.length ? labels.join(" / ") : "normal";
 
-  const postRef = getSelectedPostRef();
-  banTargetInput.value = postRef?.post?.authorId || "";
-}
-
-function renderThreadSelect() {
-  const threads = getBoardThreads(adminBoardSelect.value);
-  adminThreadSelect.innerHTML = threads.length
-    ? threads.map((thread) => `<option value="${thread.threadId}">No.${thread.threadId} ${thread.subject}</option>`).join("")
-    : '<option value="">No threads</option>';
-  renderPostSelect();
-}
-
-function renderPostSelect() {
-  const selected = getSelectedThreadRef();
-  if (!selected) {
-    adminPostSelect.innerHTML = '<option value="">No posts</option>';
-    syncThreadStateLabel();
-    return;
-  }
-
-  const replies = Array.isArray(selected.thread.replies) ? selected.thread.replies : [];
-  adminPostSelect.innerHTML = [
-    `<option value="${selected.thread.opPostId}">OP ${selected.thread.opPostId}</option>`,
-    ...replies.map((reply) => `<option value="${reply.postId}">Reply ${reply.postId}</option>`),
-  ].join("");
-  syncThreadStateLabel();
-}
-
-function renderOverview() {
-  const threads = loadThreads();
-  const reports = loadReports();
-  const bans = loadBans();
-  const threadCount = Object.values(threads).reduce((sum, boardThreads) => sum + boardThreads.length, 0);
-  const postCount = Object.values(threads).reduce(
-    (sum, boardThreads) =>
-      sum + boardThreads.reduce((boardSum, thread) => boardSum + 1 + (thread.replies?.length || 0), 0),
-    0,
-  );
-  const activeBans = Object.values(bans).filter((entry) => entry.type === "permanent" || Number(entry.until || 0) > Date.now()).length;
-
-  overviewThreads.textContent = String(threadCount);
-  overviewPosts.textContent = String(postCount);
-  overviewReports.textContent = String(reports.length);
-  overviewBans.textContent = String(activeBans);
-}
-
-function renderReports() {
-  const reports = loadReports();
-  adminReportQueue.innerHTML = reports.length
-    ? reports
-        .map(
-          (report) => `
-            <div class="report-item">
-              <strong>/${report.board}/ No.${report.threadId} >>${report.postId}</strong>
-              <span>${report.authorId || "unknown"}</span>
-              <div class="admin-action-row">
-                <a class="utility-button" href="thread.html?board=${report.board}&thread=${report.threadId}">Open</a>
-                <button class="utility-button" type="button" data-report-focus="${report.id}">Focus</button>
-                <button class="utility-button" type="button" data-report-resolve="${report.id}">Resolve</button>
-              </div>
-            </div>
-          `,
-        )
-        .join("")
-    : '<p class="empty-state">No reports yet.</p>';
-}
-
-function renderBanList() {
-  const bans = loadBans();
-  const entries = Object.entries(bans).filter(([, entry]) => entry.type === "permanent" || Number(entry.until || 0) > Date.now());
-  banList.innerHTML = entries.length
-    ? entries
-        .map(([clientId, entry]) => {
-          const label = entry.type === "permanent"
-            ? "permanent"
-            : `until ${new Date(entry.until).toLocaleString()}`;
-          return `
-            <div class="report-item">
-              <strong>${clientId}</strong>
-              <span>${label}</span>
-              <button class="utility-button" type="button" data-unban-client="${clientId}">Unban</button>
-            </div>
-          `;
-        })
-        .join("")
-    : '<p class="empty-state">No active bans.</p>';
-}
-
-function renderAll() {
-  renderOverview();
-  renderReports();
-  renderThreadSelect();
-  renderBanList();
+  const reply = getSelectedReply();
+  banTargetInput.value = reply?.poster_client_id || thread.poster_client_id || "";
 }
 
 function showActionNotice(message) {
-  if (!adminActionNotice) {
-    return;
-  }
-
   adminActionNotice.textContent = message;
   adminActionNotice.classList.remove("hidden");
   window.clearTimeout(actionNoticeTimeout);
@@ -345,115 +128,160 @@ function showActionNotice(message) {
   }, 2200);
 }
 
-function syncModerationMirror(thread) {
-  const moderation = loadModeration();
-  const board = adminBoardSelect.value;
-  moderation[board] = moderation[board] || {};
-  moderation[board][thread.threadId] = moderation[board][thread.threadId] || {};
-  moderation[board][thread.threadId].pinned = Boolean(thread.pinned);
-  moderation[board][thread.threadId].locked = Boolean(thread.locked);
-  moderation[board][thread.threadId].archived = Boolean(thread.archived);
-  saveModeration(moderation);
+function renderThreadSelect() {
+  adminThreadSelect.innerHTML = currentThreadRows.length
+    ? currentThreadRows.map((thread) => `<option value="${thread.thread_number}">No.${thread.thread_number} ${thread.subject}</option>`).join("")
+    : '<option value="">No threads</option>';
 }
 
-function removeReportsFor(board, threadId, postId) {
-  const filtered = loadReports().filter((report) => {
-    if (report.board !== board || Number(report.threadId) !== Number(threadId)) {
-      return true;
-    }
-    if (!postId) {
-      return false;
-    }
-    return report.postId !== postId;
+function renderPostSelect() {
+  if (!currentThreadDetail) {
+    adminPostSelect.innerHTML = '<option value="">No posts</option>';
+    syncThreadStateLabel();
+    return;
+  }
+
+  const replies = currentThreadDetail.replies || [];
+  adminPostSelect.innerHTML = [
+    '<option value="op">OP</option>',
+    ...replies.map((reply) => `<option value="${reply.post_number}">Reply ${String(reply.post_number).padStart(3, "0")}</option>`),
+  ].join("");
+  syncThreadStateLabel();
+}
+
+function renderReports() {
+  adminReportQueue.innerHTML = currentReports.length
+    ? currentReports.map((report) => `
+        <div class="report-item">
+          <strong>/${report.board_key}/ No.${report.threads?.thread_number || "?"} >>${String(report.target_post_number).padStart(3, "0")}</strong>
+          <span>${report.reason || "Reported post"}</span>
+          <div class="admin-action-row">
+            <a class="utility-button" href="thread.html?board=${report.board_key}&thread=${report.threads?.thread_number || ""}">Open</a>
+            <button class="utility-button" type="button" data-report-focus="${report.id}">Focus</button>
+            <button class="utility-button" type="button" data-report-resolve="${report.id}">Resolve</button>
+          </div>
+        </div>
+      `).join("")
+    : '<p class="empty-state">No reports yet.</p>';
+}
+
+function renderBanList() {
+  const activeBans = currentBans.filter((entry) => entry.ban_type === "permanent" || (entry.expires_at && new Date(entry.expires_at) > new Date()));
+  banList.innerHTML = activeBans.length
+    ? activeBans.map((entry) => `
+        <div class="report-item">
+          <strong>${entry.target_poster_client_id || "unknown"}</strong>
+          <span>${entry.ban_type === "permanent" ? "permanent" : `until ${new Date(entry.expires_at).toLocaleString()}`}</span>
+          <button class="utility-button" type="button" data-unban-id="${entry.id}">Unban</button>
+        </div>
+      `).join("")
+    : '<p class="empty-state">No active bans.</p>';
+}
+
+async function loadThreadDetail() {
+  const thread = getSelectedThreadRow();
+  if (!thread) {
+    currentThreadDetail = null;
+    renderPostSelect();
+    return;
+  }
+
+  currentThreadDetail = await window.AscendApi.getThread(thread.board_key, thread.thread_number);
+  renderPostSelect();
+}
+
+async function loadBoardThreads() {
+  currentThreadRows = await window.AscendApi.listAdminThreads(adminBoardSelect.value);
+  renderThreadSelect();
+  await loadThreadDetail();
+}
+
+async function refreshOverview() {
+  const boardLists = await Promise.all(boardKeys.map((board) => window.AscendApi.listAdminThreads(board)));
+  const threadCount = boardLists.reduce((sum, rows) => sum + rows.length, 0);
+  const postCount = boardLists.reduce((sum, rows) => sum + rows.reduce((boardSum, row) => boardSum + 1 + Number(row.reply_count || 0), 0), 0);
+  overviewThreads.textContent = String(threadCount);
+  overviewPosts.textContent = String(postCount);
+}
+
+async function refreshReports() {
+  currentReports = await window.AscendApi.listReports();
+  overviewReports.textContent = String(currentReports.length);
+  renderReports();
+}
+
+async function refreshBans() {
+  currentBans = await window.AscendApi.listBans();
+  const activeCount = currentBans.filter((entry) => entry.ban_type === "permanent" || (entry.expires_at && new Date(entry.expires_at) > new Date())).length;
+  overviewBans.textContent = String(activeCount);
+  renderBanList();
+}
+
+async function refreshAll() {
+  await Promise.all([refreshOverview(), refreshReports(), refreshBans()]);
+  await loadBoardThreads();
+}
+
+async function toggleThreadFlag(flag) {
+  const thread = getSelectedThreadRow();
+  if (!thread) return;
+
+  await window.AscendApi.setThreadFlags(thread.board_key, thread.thread_number, {
+    [flag]: !thread[flag],
   });
-  saveReports(filtered);
+  await refreshAll();
+  showActionNotice(`Thread No.${thread.thread_number} updated.`);
 }
 
-function removeBookmarksFor(board, threadId) {
-  const bookmarks = loadBookmarks();
-  const boardBookmarks = Array.isArray(bookmarks[board]) ? bookmarks[board] : [];
-  bookmarks[board] = boardBookmarks.filter((id) => Number(id) !== Number(threadId));
-  saveBookmarks(bookmarks);
-}
+async function deleteSelectedPost() {
+  const thread = getSelectedThreadRow();
+  if (!thread || !currentThreadDetail) return;
 
-function toggleThreadFlag(flag) {
-  const selected = getSelectedThreadRef();
-  if (!selected) {
-    return;
-  }
-  selected.thread[flag] = !selected.thread[flag];
-  saveThreads(selected.threadMap);
-  syncModerationMirror(selected.thread);
-  renderAll();
-  showActionNotice(`Thread No.${selected.threadId} ${selected.thread[flag] ? flag + " enabled" : flag + " removed"}.`);
-}
-
-function deleteSelectedPost() {
-  const selected = getSelectedPostRef();
-  if (!selected) {
+  const selectedPost = adminPostSelect.value;
+  if (!selectedPost || selectedPost === "op") {
+    await deleteSelectedThread();
     return;
   }
 
-  if (selected.post.isOp) {
-    deleteSelectedThread();
-    return;
-  }
-
-  selected.thread.replies = selected.thread.replies.filter((reply) => reply.postId !== selected.postId);
-  selected.thread.replyCount = selected.thread.replies.length;
-  selected.thread.updatedAt = Date.now();
-  saveThreads(selected.threadMap);
-  removeReportsFor(selected.board, selected.threadId, selected.postId);
-  renderAll();
-  showActionNotice(`Post ${selected.postId} deleted from /${selected.board}/.`);
+  await window.AscendApi.deletePost(thread.board_key, thread.thread_number, selectedPost);
+  await refreshAll();
+  showActionNotice(`Reply ${String(selectedPost).padStart(3, "0")} deleted.`);
 }
 
-function deleteSelectedThread() {
-  const selected = getSelectedThreadRef();
-  if (!selected) {
-    return;
-  }
+async function deleteSelectedThread() {
+  const thread = getSelectedThreadRow();
+  if (!thread) return;
 
-  selected.threadMap[selected.board] = selected.boardThreads.filter((thread) => Number(thread.threadId) !== Number(selected.threadId));
-  saveThreads(selected.threadMap);
-  removeReportsFor(selected.board, selected.threadId);
-  removeBookmarksFor(selected.board, selected.threadId);
-  renderAll();
-  showActionNotice(`Thread No.${selected.threadId} deleted from /${selected.board}/.`);
+  await window.AscendApi.deleteThread(thread.board_key, thread.thread_number);
+  await refreshAll();
+  showActionNotice(`Thread No.${thread.thread_number} archived.`);
 }
 
-function applyBan(type) {
+async function applyBan(type) {
   const clientId = banTargetInput.value.trim();
-  if (!clientId) {
+  if (!clientId) return;
+  const minutes = Math.max(1, Number(tempBanMinutes.value) || 60);
+  await window.AscendApi.applyBan(clientId, type, minutes);
+  await refreshBans();
+  showActionNotice(type === "permanent" ? `${clientId} permanently banned.` : `${clientId} temp banned.`);
+}
+
+async function removeBan(banId) {
+  if (!banId) return;
+  await window.AscendApi.removeBan(banId);
+  await refreshBans();
+  showActionNotice("Ban removed.");
+}
+
+async function initAdmin() {
+  const authState = await window.AscendAuth.refreshRole();
+  if (authState.role !== "admin") {
+    window.location.href = "index.html";
     return;
   }
 
-  const bans = loadBans();
-  if (type === "permanent") {
-    bans[clientId] = { type: "permanent", createdAt: Date.now() };
-  } else {
-    const minutes = Math.max(1, Number(tempBanMinutes.value) || 60);
-    bans[clientId] = {
-      type: "temporary",
-      until: Date.now() + minutes * 60 * 1000,
-      createdAt: Date.now(),
-    };
-  }
-  saveBans(bans);
-  renderAll();
-  showActionNotice(
-    type === "permanent"
-      ? `${clientId} permanently banned.`
-      : `${clientId} temp banned for ${Math.max(1, Number(tempBanMinutes.value) || 60)} minute(s).`,
-  );
-}
-
-function removeBan(clientId) {
-  const bans = loadBans();
-  delete bans[clientId];
-  saveBans(bans);
-  renderAll();
-  showActionNotice(`${clientId} unbanned.`);
+  applyPreferences(draftPrefs);
+  await refreshAll();
 }
 
 customizeToggle.addEventListener("click", () => {
@@ -503,61 +331,97 @@ document.querySelectorAll("[data-close-panel]").forEach((button) => {
   });
 });
 
-adminLogoutButton.addEventListener("click", () => {
-  sessionStorage.removeItem(storageKeys.role);
+adminLogoutButton.addEventListener("click", async () => {
+  await window.AscendAuth.signOut();
   localStorage.removeItem(storageKeys.role);
   window.location.href = "index.html";
 });
 
-adminBoardSelect.addEventListener("change", renderThreadSelect);
-adminThreadSelect.addEventListener("change", renderPostSelect);
+adminBoardSelect.addEventListener("change", () => {
+  loadBoardThreads().catch((error) => showActionNotice(error.message || "Could not load board threads."));
+});
+
+adminThreadSelect.addEventListener("change", () => {
+  loadThreadDetail().catch((error) => showActionNotice(error.message || "Could not load thread."));
+});
+
 adminPostSelect.addEventListener("change", syncThreadStateLabel);
 
-adminPinThreadButton.addEventListener("click", () => toggleThreadFlag("pinned"));
-adminLockThreadButton.addEventListener("click", () => toggleThreadFlag("locked"));
-adminArchiveThreadButton.addEventListener("click", () => toggleThreadFlag("archived"));
-adminDeletePostButton.addEventListener("click", deleteSelectedPost);
-adminDeleteThreadButton.addEventListener("click", deleteSelectedThread);
-tempBanButton.addEventListener("click", () => applyBan("temporary"));
-permaBanButton.addEventListener("click", () => applyBan("permanent"));
-unbanButton.addEventListener("click", () => removeBan(banTargetInput.value.trim()));
-clearAllReportsButton.addEventListener("click", () => {
-  saveReports([]);
-  renderAll();
-  showActionNotice("All reports cleared.");
+adminPinThreadButton.addEventListener("click", () => {
+  toggleThreadFlag("pinned").catch((error) => showActionNotice(error.message || "Could not update thread."));
+});
+adminLockThreadButton.addEventListener("click", () => {
+  toggleThreadFlag("locked").catch((error) => showActionNotice(error.message || "Could not update thread."));
+});
+adminArchiveThreadButton.addEventListener("click", () => {
+  toggleThreadFlag("archived").catch((error) => showActionNotice(error.message || "Could not update thread."));
+});
+adminDeletePostButton.addEventListener("click", () => {
+  deleteSelectedPost().catch((error) => showActionNotice(error.message || "Could not delete post."));
+});
+adminDeleteThreadButton.addEventListener("click", () => {
+  deleteSelectedThread().catch((error) => showActionNotice(error.message || "Could not delete thread."));
+});
+tempBanButton.addEventListener("click", () => {
+  applyBan("temporary").catch((error) => showActionNotice(error.message || "Could not apply ban."));
+});
+permaBanButton.addEventListener("click", () => {
+  applyBan("permanent").catch((error) => showActionNotice(error.message || "Could not apply ban."));
+});
+unbanButton.addEventListener("click", () => {
+  const match = currentBans.find((entry) => entry.target_poster_client_id === banTargetInput.value.trim());
+  if (!match) {
+    showActionNotice("No active ban found for that client ID.");
+    return;
+  }
+  removeBan(match.id).catch((error) => showActionNotice(error.message || "Could not remove ban."));
+});
+clearAllReportsButton.addEventListener("click", async () => {
+  for (const report of currentReports) {
+    await window.AscendApi.resolveReport(report.id);
+  }
+  await refreshReports();
+  showActionNotice("All open reports resolved.");
 });
 
 document.addEventListener("click", (event) => {
   const resolveButton = event.target.closest("[data-report-resolve]");
   if (resolveButton) {
-    const reportId = Number(resolveButton.dataset.reportResolve);
-    saveReports(loadReports().filter((report) => Number(report.id) !== reportId));
-    renderAll();
-    showActionNotice("Report resolved.");
+    window.AscendApi.resolveReport(Number(resolveButton.dataset.reportResolve))
+      .then(refreshReports)
+      .then(() => showActionNotice("Report resolved."))
+      .catch((error) => showActionNotice(error.message || "Could not resolve report."));
     return;
   }
 
   const focusButton = event.target.closest("[data-report-focus]");
   if (focusButton) {
-    const report = loadReports().find((entry) => Number(entry.id) === Number(focusButton.dataset.reportFocus));
-    if (!report) {
-      return;
-    }
-    adminBoardSelect.value = report.board;
-    renderThreadSelect();
-    adminThreadSelect.value = String(report.threadId);
-    renderPostSelect();
-    adminPostSelect.value = String(report.postId);
-    syncThreadStateLabel();
-    showActionNotice(`Focused /${report.board}/ No.${report.threadId} >>${report.postId}.`);
+    const report = currentReports.find((entry) => Number(entry.id) === Number(focusButton.dataset.reportFocus));
+    if (!report?.threads?.thread_number) return;
+    adminBoardSelect.value = report.board_key;
+    loadBoardThreads()
+      .then(() => {
+        adminThreadSelect.value = String(report.threads.thread_number);
+        return loadThreadDetail();
+      })
+      .then(() => {
+        adminPostSelect.value = String(report.target_post_number);
+        syncThreadStateLabel();
+        showActionNotice(`Focused /${report.board_key}/ No.${report.threads.thread_number}.`);
+      })
+      .catch((error) => showActionNotice(error.message || "Could not focus report."));
     return;
   }
 
-  const unbanClientButton = event.target.closest("[data-unban-client]");
-  if (unbanClientButton) {
-    removeBan(unbanClientButton.dataset.unbanClient);
+  const unbanButtonInline = event.target.closest("[data-unban-id]");
+  if (unbanButtonInline) {
+    removeBan(Number(unbanButtonInline.dataset.unbanId)).catch((error) => showActionNotice(error.message || "Could not remove ban."));
   }
 });
 
-applyPreferences(draftPrefs);
-renderAll();
+initAdmin().catch((error) => {
+  showActionNotice(error.message || "Admin init failed.");
+  window.setTimeout(() => {
+    window.location.href = "index.html";
+  }, 1200);
+});

@@ -7,8 +7,6 @@ const storageKeys = {
 };
 
 const defaultPrefs = { theme: "classic-olive", font: "tahoma", fontWeight: "regular", fontSize: 100 };
-const adminPasswords = window.AscendLocalConfig?.adminPasswords || {};
-
 const body = document.body;
 const customizePanel = document.getElementById("customizePanel");
 const loginPanel = document.getElementById("loginPanel");
@@ -29,6 +27,7 @@ const noticeboardToggle = document.getElementById("noticeboardToggle");
 const noticeboardList = document.getElementById("noticeboardList");
 const recentList = document.getElementById("recentList");
 const loginForm = document.getElementById("loginForm");
+const emailInput = document.getElementById("emailInput");
 const passwordInput = document.getElementById("passwordInput");
 const loginStatus = document.getElementById("loginStatus");
 const dashboardRole = document.getElementById("dashboardRole");
@@ -90,8 +89,6 @@ function updateDashboardRole(role) {
 }
 
 function unlockDashboard(role) {
-  sessionStorage.setItem(storageKeys.role, role);
-  localStorage.removeItem(storageKeys.role);
   if (role === "admin") {
     window.location.href = "admin.html";
     return;
@@ -99,9 +96,9 @@ function unlockDashboard(role) {
   updateDashboardRole(role);
   openPanel(dashboardPanel);
   loginStatus.textContent = `${role} login successful.`;
+  if (emailInput) emailInput.value = "";
   passwordInput.value = "";
   syncSavedLoginState();
-  syncNoticeboardEditor();
 }
 
 async function renderBookmarks() {
@@ -153,11 +150,8 @@ loginToggle.addEventListener("click", () => {
     openPanel(dashboardPanel);
     return;
   }
-  if (!adminPasswords.admin && !adminPasswords.developer) {
-    loginStatus.textContent = "Admin login is disabled here. Local-only passwords can be loaded from local-config.js.";
-  } else {
-    loginStatus.textContent = "Use developer or admin password to unlock moderation tools.";
-  }
+  loginStatus.textContent = "Sign in with the account whose profile role is set to developer or admin.";
+  if (emailInput) emailInput.value = "";
   passwordInput.value = "";
   openPanel(loginPanel);
 });
@@ -190,26 +184,42 @@ noticeboardToggle?.addEventListener("click", () => noticeboardList?.classList.to
 document.querySelectorAll("[data-close-panel]").forEach((button) => {
   button.addEventListener("click", () => closePanel(button.dataset.closePanel));
 });
-loginForm.addEventListener("submit", (event) => {
+loginForm.addEventListener("submit", async (event) => {
   event.preventDefault();
+  const email = emailInput?.value.trim() || "";
   const password = passwordInput.value.trim();
-  if (adminPasswords.admin && password === adminPasswords.admin) return unlockDashboard("admin");
-  if (adminPasswords.developer && password === adminPasswords.developer) return unlockDashboard("developer");
-  if (!adminPasswords.admin && !adminPasswords.developer) {
-    loginStatus.textContent = "Admin login is disabled until local-config.js is added locally.";
+  if (!email || !password) {
+    loginStatus.textContent = "Enter both email and password.";
     return;
   }
-  loginStatus.textContent = "Password rejected.";
+  loginStatus.textContent = "Signing in...";
+  try {
+    const authState = await window.AscendAuth.signIn(email, password);
+    if (authState.role === "admin" || authState.role === "developer") {
+      unlockDashboard(authState.role);
+      return;
+    }
+    await window.AscendAuth.signOut();
+    loginStatus.textContent = "This account is signed in, but it does not have admin access.";
+  } catch (error) {
+    loginStatus.textContent = error.message || "Login failed.";
+  }
 });
 logoutButton.addEventListener("click", () => {
-  sessionStorage.removeItem(storageKeys.role);
+  window.AscendAuth.signOut().catch(() => {
+    sessionStorage.removeItem(storageKeys.role);
+  });
   localStorage.removeItem(storageKeys.role);
   dashboardPanel.classList.add("hidden");
   syncSavedLoginState();
 });
 
 applyPreferences(draftPrefs);
-syncSavedLoginState();
-renderNoticeboard();
-renderBookmarks();
-renderRecentActivity();
+window.AscendAuth.refreshRole()
+  .catch(() => ({ role: "anon" }))
+  .finally(() => {
+    syncSavedLoginState();
+    renderNoticeboard();
+    renderBookmarks();
+    renderRecentActivity();
+  });

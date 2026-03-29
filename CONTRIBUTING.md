@@ -5,7 +5,7 @@ Thanks for helping improve Ascend Chan.
 ## Before You Start
 
 - Read the setup steps in `README.md`
-- Keep secrets and local credentials in `local-config.js`
+- Keep secrets out of the repo and do not commit private credentials or service-role keys
 - Do not commit production keys, passwords, or personal project URLs unless they are intentionally public
 
 ## Development Guidelines

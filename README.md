@@ -31,24 +31,21 @@ The site now uses `public-config.js` for safe frontend values like the Supabase 
 
 Those values are expected to be public in a browser app and should be protected by proper Supabase Row Level Security.
 
-### 3. Add your local-only config
+### 3. Create your admin account
 
-Copy `local-config.example.js` to `local-config.js` and fill in your own local-only values:
+Admin access now uses Supabase Auth plus the `profiles` table.
 
-```js
-window.AscendLocalConfig = {
-  adminPasswords: {
-    admin: "choose-a-local-admin-password",
-    developer: "choose-a-local-developer-password",
-  },
-};
-```
+The basic flow is:
 
-`local-config.js` is gitignored, so it stays on your machine.
+1. Create a user in Supabase Auth.
+2. Make sure that user has a matching row in `profiles`.
+3. Set `profiles.role` to `admin` for your account.
+
+The frontend checks your signed-in account and only unlocks the admin panel when that stored role is `admin`.
 
 ### 4. Serve the files
 
-This is a static project, so any simple local server will do. Personally, I use git bash :
+This is a static project, so any simple local server will do. Personally, I use git bash:
 
 ```git bash
 cd Project //Locate the project
@@ -74,7 +71,7 @@ Then check on which port the site is hosted then open `http://localhost:port`.
 
 This repo is safe to publish now, but it is still important to be honest about what this project is.
 
-The admin password flow is only a local browser-side convenience. It is not real authentication. If you publish a `local-config.js` file on a public static site, anyone can fetch it. Real moderation needs backend or Supabase-auth-based authorization with stricter policies.
+The old frontend password flow has been removed. Admin access now depends on Supabase Auth plus your `profiles.role` value.
 
 Before deploying this publicly, review and harden the policies in `supabase_schema.sql`.
 

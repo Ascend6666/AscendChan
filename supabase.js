@@ -27,6 +27,60 @@ window.AscendClient = {
   },
 };
 
+window.AscendAuth = {
+  async getSession() {
+    if (!window.AscendSupabase?.auth) return null;
+    const { data, error } = await window.AscendSupabase.auth.getSession();
+    if (error) throw error;
+    return data.session || null;
+  },
+  async getUser() {
+    if (!window.AscendSupabase?.auth) return null;
+    const { data, error } = await window.AscendSupabase.auth.getUser();
+    if (error) throw error;
+    return data.user || null;
+  },
+  async getProfile(userId) {
+    if (!window.AscendSupabase || !userId) return null;
+    const { data, error } = await window.AscendSupabase
+      .from("profiles")
+      .select("id, role, display_name")
+      .eq("id", userId)
+      .maybeSingle();
+    if (error) throw error;
+    return data || null;
+  },
+  async refreshRole() {
+    const user = await this.getUser();
+    if (!user) {
+      sessionStorage.removeItem("ascendchan-role");
+      return { user: null, profile: null, role: "anon" };
+    }
+
+    const profile = await this.getProfile(user.id);
+    const role = profile?.role === "admin" || profile?.role === "developer" ? profile.role : "user";
+    if (role === "admin" || role === "developer") {
+      sessionStorage.setItem("ascendchan-role", role);
+    } else {
+      sessionStorage.removeItem("ascendchan-role");
+    }
+    return { user, profile, role };
+  },
+  async signIn(email, password) {
+    if (!window.AscendSupabase?.auth) throw new Error("Supabase auth is not available.");
+    const { error } = await window.AscendSupabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+    return this.refreshRole();
+  },
+  async signOut() {
+    if (window.AscendSupabase?.auth) {
+      const { error } = await window.AscendSupabase.auth.signOut();
+      if (error) throw error;
+    }
+    sessionStorage.removeItem("ascendchan-role");
+  },
+};
+
 window.AscendAlias = {
   names: [
     "chadjeet",

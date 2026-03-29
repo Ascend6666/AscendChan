@@ -236,6 +236,19 @@ begin
 end;
 $$;
 
+create or replace function public.is_admin_user()
+returns boolean
+language sql
+stable
+as $$
+  select exists (
+    select 1
+    from public.profiles
+    where id = auth.uid()
+      and role = 'admin'
+  );
+$$;
+
 do $$
 declare
   names text[] := array[
@@ -316,11 +329,11 @@ to anon, authenticated
 using (true);
 
 drop policy if exists "reports are readable by authenticated" on public.reports;
-create policy "reports are readable by authenticated"
+create policy "reports are readable by admin"
 on public.reports
 for select
 to authenticated
-using (true);
+using (public.is_admin_user());
 
 drop policy if exists "profiles are self readable" on public.profiles;
 create policy "profiles are self readable"
@@ -366,6 +379,35 @@ on public.reports
 for insert
 to anon, authenticated
 with check (true);
+
+drop policy if exists "admin can update reports" on public.reports;
+create policy "admin can update reports"
+on public.reports
+for update
+to authenticated
+using (public.is_admin_user())
+with check (public.is_admin_user());
+
+drop policy if exists "admin can read bans" on public.bans;
+create policy "admin can read bans"
+on public.bans
+for select
+to authenticated
+using (public.is_admin_user());
+
+drop policy if exists "admin can insert bans" on public.bans;
+create policy "admin can insert bans"
+on public.bans
+for insert
+to authenticated
+with check (public.is_admin_user());
+
+drop policy if exists "admin can delete bans" on public.bans;
+create policy "admin can delete bans"
+on public.bans
+for delete
+to authenticated
+using (public.is_admin_user());
 
 drop policy if exists "public can update threads" on public.threads;
 create policy "public can update threads"
