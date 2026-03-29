@@ -153,10 +153,10 @@ function renderReports() {
   adminReportQueue.innerHTML = currentReports.length
     ? currentReports.map((report) => `
         <div class="report-item">
-          <strong>/${report.board_key}/ No.${report.threads?.thread_number || "?"} >>${String(report.target_post_number).padStart(3, "0")}</strong>
+          <strong>/${report.board_key}/ No.${report.thread?.thread_number || "?"} >>${String(report.target_post_number).padStart(3, "0")}</strong>
           <span>${report.reason || "Reported post"}</span>
           <div class="admin-action-row">
-            <a class="utility-button" href="thread.html?board=${report.board_key}&thread=${report.threads?.thread_number || ""}">Open</a>
+            <a class="utility-button" href="thread.html?board=${report.board_key}&thread=${report.thread?.thread_number || ""}">Open</a>
             <button class="utility-button" type="button" data-report-focus="${report.id}">Focus</button>
             <button class="utility-button" type="button" data-report-resolve="${report.id}">Resolve</button>
           </div>
@@ -205,20 +205,34 @@ async function refreshOverview() {
 }
 
 async function refreshReports() {
-  currentReports = await window.AscendApi.listReports();
-  overviewReports.textContent = String(currentReports.length);
-  renderReports();
+  try {
+    currentReports = await window.AscendApi.listReports();
+    overviewReports.textContent = String(currentReports.length);
+    renderReports();
+  } catch (error) {
+    currentReports = [];
+    overviewReports.textContent = "0";
+    adminReportQueue.innerHTML = '<p class="empty-state">Could not load reports.</p>';
+    showActionNotice(error.message || "Could not load reports.");
+  }
 }
 
 async function refreshBans() {
-  currentBans = await window.AscendApi.listBans();
-  const activeCount = currentBans.filter((entry) => entry.ban_type === "permanent" || (entry.expires_at && new Date(entry.expires_at) > new Date())).length;
-  overviewBans.textContent = String(activeCount);
-  renderBanList();
+  try {
+    currentBans = await window.AscendApi.listBans();
+    const activeCount = currentBans.filter((entry) => entry.ban_type === "permanent" || (entry.expires_at && new Date(entry.expires_at) > new Date())).length;
+    overviewBans.textContent = String(activeCount);
+    renderBanList();
+  } catch (error) {
+    currentBans = [];
+    overviewBans.textContent = "0";
+    banList.innerHTML = '<p class="empty-state">Could not load bans.</p>';
+    showActionNotice(error.message || "Could not load bans.");
+  }
 }
 
 async function refreshAll() {
-  await Promise.all([refreshOverview(), refreshReports(), refreshBans()]);
+  await Promise.allSettled([refreshOverview(), refreshReports(), refreshBans()]);
   await loadBoardThreads();
 }
 
@@ -397,17 +411,17 @@ document.addEventListener("click", (event) => {
   const focusButton = event.target.closest("[data-report-focus]");
   if (focusButton) {
     const report = currentReports.find((entry) => Number(entry.id) === Number(focusButton.dataset.reportFocus));
-    if (!report?.threads?.thread_number) return;
+    if (!report?.thread?.thread_number) return;
     adminBoardSelect.value = report.board_key;
     loadBoardThreads()
       .then(() => {
-        adminThreadSelect.value = String(report.threads.thread_number);
+        adminThreadSelect.value = String(report.thread.thread_number);
         return loadThreadDetail();
       })
       .then(() => {
         adminPostSelect.value = String(report.target_post_number);
         syncThreadStateLabel();
-        showActionNotice(`Focused /${report.board_key}/ No.${report.threads.thread_number}.`);
+        showActionNotice(`Focused /${report.board_key}/ No.${report.thread.thread_number}.`);
       })
       .catch((error) => showActionNotice(error.message || "Could not focus report."));
     return;
