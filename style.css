@@ -1487,18 +1487,6 @@ input[type="range"] {
   color: var(--muted);
 }
 
-.donate-guide p {
-  margin: 0;
-}
-
-.donate-steps {
-  margin: 0;
-  padding-left: 20px;
-  display: grid;
-  gap: 6px;
-  color: var(--text);
-}
-
 .donation-grid {
   padding: 7px 8px;
   display: grid;

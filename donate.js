@@ -72,7 +72,7 @@ function escapeHtml(value) {
 function renderDonationMethods() {
   const methods = Array.isArray(window.AscendConfig?.donations) ? window.AscendConfig.donations : [];
   if (!methods.length) {
-    donationGrid.innerHTML = '<p class="empty-state">No donation methods configured yet. Add them in local-config.js.</p>';
+    donationGrid.innerHTML = '<p class="empty-state">No donation methods configured yet. Add your UPI or payment link details in local-config.js.</p>';
     return;
   }
 
@@ -82,17 +82,17 @@ function renderDonationMethods() {
         <div class="donation-card-head">
           <div>
             <h3>${escapeHtml(method.label || "Donation method")}</h3>
-            <p class="donation-meta">${escapeHtml(method.network || "anonymous-friendly")}</p>
+            <p class="donation-meta">${escapeHtml(method.network || "support option")}</p>
           </div>
           ${method.recommended ? '<span class="donation-badge">recommended</span>' : ""}
         </div>
         <p class="donation-note">${escapeHtml(method.note || "Use the address below exactly as shown.")}</p>
         <label class="select-wrap donation-address-wrap" for="donationAddress${index}">
-          <span>Address</span>
+          <span>Details</span>
           <textarea id="donationAddress${index}" rows="3" readonly>${escapeHtml(method.address || "")}</textarea>
         </label>
         <div class="composer-actions">
-          <button class="utility-button" type="button" data-copy-donation="${index}">Copy address</button>
+          <button class="utility-button" type="button" data-copy-donation="${index}">Copy details</button>
         </div>
       </article>
     `)
@@ -159,12 +159,12 @@ document.addEventListener("click", async (event) => {
     await navigator.clipboard.writeText(address);
     copyButton.textContent = "Copied";
     window.setTimeout(() => {
-      copyButton.textContent = "Copy address";
+      copyButton.textContent = "Copy details";
     }, 1200);
   } catch {
     copyButton.textContent = "Copy failed";
     window.setTimeout(() => {
-      copyButton.textContent = "Copy address";
+      copyButton.textContent = "Copy details";
     }, 1200);
   }
 });

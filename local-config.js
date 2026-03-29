@@ -7,17 +7,17 @@ window.AscendConfig = {
   },
   donations: [
     {
-      label: "Monero",
-      network: "XMR",
-      address: "add-your-monero-address-here",
-      note: "Best choice if you want the most privacy.",
+      label: "UPI",
+      network: "India",
+      address: "add-your-upi-id-here",
+      note: "Donate directly using your UPI app.",
       recommended: true,
     },
     {
-      label: "Bitcoin",
-      network: "BTC",
-      address: "add-your-bitcoin-address-here",
-      note: "Use a fresh address if privacy matters.",
+      label: "Payment Link",
+      network: "Razorpay",
+      address: "add-your-payment-link-here",
+      note: "Use this if you prefer a hosted checkout page.",
     },
   ],
 };
