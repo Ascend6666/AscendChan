@@ -25,44 +25,33 @@ The goal was to keep it simple, minimal and comfy place to interact.
 
 Create a Supabase project, then run the SQL from `supabase_schema.sql`.
 
-### 2. Review the public config
+### 2. Add your local config
 
-The site now uses `public-config.js` for safe frontend values like the Supabase project URL and anon key.
-
-Those values are expected to be public in a browser app and should be protected by proper Supabase Row Level Security.
-
-You can start by copying `public-config.example.js` to `public-config.js` and filling in your project values:
+Copy `local-config.example.js` to `local-config.js` and fill in your own values:
 
 ```js
 window.AscendConfig = {
   supabaseUrl: "https://your-project-ref.supabase.co",
   supabaseAnonKey: "your-public-anon-key",
+  adminPasswords: {
+    admin: "choose-a-local-admin-password",
+  },
 };
 ```
 
-### 3. Create your admin account
+`local-config.js` is gitignored, so it is limited to local testing.
 
-Admin access now uses Supabase Auth plus the `profiles` table.
+### 3. Serve the files
 
-The basic flow is:
+This is a static project, so any simple local server will do. Personally, I use git bash :
 
-1. Create a user in Supabase Auth.
-2. Make sure that user has a matching row in `profiles`.
-3. Set `profiles.role` to `admin` for your account.
-
-The frontend checks your signed-in account and only unlocks the admin panel when that stored role is `admin`.
-
-`local-config.js` is optional. If you want a place for local-only notes or future machine-specific overrides, copy `local-config.example.js` to `local-config.js`. Keep that file private and uncommitted.
-
-### 4. Serve the files
-
-This is a static project, so any simple local server will do. For example:
-
-```powershell
-python -m http.server 8000
+```git bash
+cd Project //Locate the project
+npm install //Install the dependencies
+npm run dev //Run the project locally
 ```
 
-Then open `http://localhost:8000`.
+Then check on which port the site is hosted then open `http://localhost:port`.
 
 ## Project files
 
@@ -80,7 +69,7 @@ Then open `http://localhost:8000`.
 
 This repo is safe to publish now, but it is still important to be honest about what this project is.
 
-The old frontend password flow has been removed. Admin access now depends on Supabase Auth plus your `profiles.role` value.
+The admin password flow is only a local browser-side convenience. It is not real authentication. If you want real moderation or roleplay :), that needs to be handled properly on the backend and through stricter Supabase policies.
 
 Before deploying this publicly, review and harden the policies in `supabase_schema.sql`.
 

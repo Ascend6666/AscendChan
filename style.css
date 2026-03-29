@@ -886,6 +886,11 @@ body[data-theme="minimal-dark"] .todo-progress.is-complete .todo-progress-bar {
   font-weight: 400;
 }
 
+.recent-board-tag {
+  color: var(--accent);
+  font-weight: 700;
+}
+
 .board-row {
   display: block;
   width: 100%;
