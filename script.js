@@ -90,7 +90,8 @@ function updateDashboardRole(role) {
 }
 
 function unlockDashboard(role) {
-  localStorage.setItem(storageKeys.role, role);
+  sessionStorage.setItem(storageKeys.role, role);
+  localStorage.removeItem(storageKeys.role);
   if (role === "admin") {
     window.location.href = "admin.html";
     return;
@@ -126,7 +127,7 @@ async function renderRecentActivity() {
 }
 
 function syncSavedLoginState() {
-  const savedRole = localStorage.getItem(storageKeys.role);
+  const savedRole = sessionStorage.getItem(storageKeys.role);
   loginToggle.textContent = savedRole === "admin" ? "Admin" : savedRole === "developer" ? "Developer" : "Login";
 }
 
@@ -142,7 +143,7 @@ customizeToggle.addEventListener("click", () => {
   openPanel(customizePanel);
 });
 loginToggle.addEventListener("click", () => {
-  const role = localStorage.getItem(storageKeys.role);
+  const role = sessionStorage.getItem(storageKeys.role);
   if (role === "admin") {
     window.location.href = "admin.html";
     return;
@@ -201,11 +202,14 @@ loginForm.addEventListener("submit", (event) => {
   loginStatus.textContent = "Password rejected.";
 });
 logoutButton.addEventListener("click", () => {
+  sessionStorage.removeItem(storageKeys.role);
   localStorage.removeItem(storageKeys.role);
   dashboardPanel.classList.add("hidden");
   syncSavedLoginState();
 });
 
+sessionStorage.removeItem(storageKeys.role);
+localStorage.removeItem(storageKeys.role);
 applyPreferences(draftPrefs);
 syncSavedLoginState();
 renderNoticeboard();

@@ -56,7 +56,7 @@ const adminActionNotice = document.getElementById("adminActionNotice");
 let draftPrefs = loadPreferences();
 let actionNoticeTimeout;
 
-if (localStorage.getItem(storageKeys.role) !== "admin") {
+if (sessionStorage.getItem(storageKeys.role) !== "admin") {
   window.location.href = "index.html";
 }
 
