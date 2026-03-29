@@ -156,7 +156,7 @@ function renderReports() {
           <strong>/${report.board_key}/ No.${report.thread?.thread_number || "?"} >>${String(report.target_post_number).padStart(3, "0")}</strong>
           <span>${report.reason || "Reported post"}</span>
           <div class="admin-action-row">
-            <a class="utility-button" href="thread.html?board=${report.board_key}&thread=${report.thread?.thread_number || ""}">Open</a>
+            <button class="utility-button" type="button" data-report-open="${report.id}">Open</button>
             <button class="utility-button" type="button" data-report-focus="${report.id}">Focus</button>
             <button class="utility-button" type="button" data-report-resolve="${report.id}">Resolve</button>
           </div>
@@ -424,6 +424,25 @@ document.addEventListener("click", (event) => {
         showActionNotice(`Focused /${report.board_key}/ No.${report.thread.thread_number}.`);
       })
       .catch((error) => showActionNotice(error.message || "Could not focus report."));
+    return;
+  }
+
+  const openButton = event.target.closest("[data-report-open]");
+  if (openButton) {
+    const report = currentReports.find((entry) => Number(entry.id) === Number(openButton.dataset.reportOpen));
+    if (!report) return;
+    const openThread = report.thread?.thread_number
+      ? Promise.resolve(report.thread)
+      : window.AscendApi.getThreadNumberById(report.thread_id);
+
+    openThread
+      .then((thread) => {
+        if (!thread?.thread_number) {
+          throw new Error("No thread exists for this report anymore.");
+        }
+        window.location.href = `thread.html?board=${report.board_key}&thread=${thread.thread_number}`;
+      })
+      .catch((error) => showActionNotice(error.message || "Could not open report thread."));
     return;
   }
 

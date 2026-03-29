@@ -394,7 +394,7 @@
         target_poster_client_id: targetPosterClientId || null,
         reason: "Reported from thread menu",
       });
-      if (error) throw error;
+      if (error) throw new Error(error.message || "Could not create report.");
     },
 
     async listAdminThreads(board) {
@@ -404,7 +404,7 @@
         .eq("board_key", board)
         .order("pinned", { ascending: false })
         .order("updated_at", { ascending: false });
-      if (error) throw error;
+      if (error) throw new Error(error.message || "Could not load admin threads.");
       return data || [];
     },
 
@@ -425,11 +425,38 @@
     async listReports() {
       const { data, error } = await supabase
         .from("reports")
-        .select("id, board_key, thread_id, target_post_number, target_poster_client_id, reason, status, created_at, threads(thread_number, subject)")
+        .select("id, board_key, thread_id, target_post_number, target_poster_client_id, reason, status, created_at")
         .eq("status", "open")
         .order("created_at", { ascending: false });
-      if (error) throw error;
-      return data || [];
+      if (error) throw new Error(error.message || "Could not load reports.");
+      if (!data?.length) return [];
+
+      const threadIds = [...new Set(data.map((report) => report.thread_id).filter(Boolean))];
+      let threadMap = {};
+      if (threadIds.length) {
+        const { data: threadRows, error: threadError } = await supabase
+          .from("threads")
+          .select("id, thread_number, subject")
+          .in("id", threadIds);
+        if (threadError) throw new Error(threadError.message || "Could not load report threads.");
+        threadMap = Object.fromEntries((threadRows || []).map((row) => [row.id, row]));
+      }
+
+      return data.map((report) => ({
+        ...report,
+        thread: threadMap[report.thread_id] || null,
+      }));
+    },
+
+    async getThreadNumberById(threadId) {
+      if (!threadId) return null;
+      const { data, error } = await supabase
+        .from("threads")
+        .select("id, board_key, thread_number, subject")
+        .eq("id", threadId)
+        .maybeSingle();
+      if (error) throw new Error(error.message || "Could not load thread.");
+      return data || null;
     },
 
     async resolveReport(reportId) {
@@ -453,7 +480,7 @@
         .from("bans")
         .select("*")
         .order("created_at", { ascending: false });
-      if (error) throw error;
+      if (error) throw new Error(error.message || "Could not load bans.");
       return data || [];
     },
 
