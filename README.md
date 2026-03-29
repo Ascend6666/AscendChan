@@ -27,19 +27,14 @@ Create a Supabase project, then run the SQL from `supabase_schema.sql`.
 
 ### 2. Add your local config
 
-Copy `local-config.example.js` to `local-config.js` and fill in your own values:
+Copy `public-config.example.js` to `public-config.js` and fill in your own values:
 
 ```js
 window.AscendConfig = {
   supabaseUrl: "https://your-project-ref.supabase.co",
   supabaseAnonKey: "your-public-anon-key",
-  adminPasswords: {
-    admin: "choose-a-local-admin-password",
-  },
 };
 ```
-
-`local-config.js` is gitignored, so it is limited to local testing.
 
 ### 3. Serve the files
 
@@ -69,9 +64,7 @@ Then check on which port the site is hosted then open `http://localhost:port`.
 
 This repo is safe to publish now, but it is still important to be honest about what this project is.
 
-The admin password flow is only a local browser-side convenience. It is not real authentication. If you want real moderation or roleplay :), that needs to be handled properly on the backend and through stricter Supabase policies.
-
-Before deploying this publicly, review and harden the policies in `supabase_schema.sql`.
+This site currently does not need moderators :)
 
 ## Contributing
 
