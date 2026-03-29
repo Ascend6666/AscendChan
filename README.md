@@ -31,6 +31,15 @@ The site now uses `public-config.js` for safe frontend values like the Supabase 
 
 Those values are expected to be public in a browser app and should be protected by proper Supabase Row Level Security.
 
+You can start by copying `public-config.example.js` to `public-config.js` and filling in your project values:
+
+```js
+window.AscendConfig = {
+  supabaseUrl: "https://your-project-ref.supabase.co",
+  supabaseAnonKey: "your-public-anon-key",
+};
+```
+
 ### 3. Create your admin account
 
 Admin access now uses Supabase Auth plus the `profiles` table.
@@ -42,6 +51,8 @@ The basic flow is:
 3. Set `profiles.role` to `admin` for your account.
 
 The frontend checks your signed-in account and only unlocks the admin panel when that stored role is `admin`.
+
+If you want a place for local-only notes or future machine-specific overrides, copy `local-config.example.js` to `local-config.js`. That file should stay private and uncommitted.
 
 ### 4. Serve the files
 
