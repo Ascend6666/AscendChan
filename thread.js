@@ -4,6 +4,7 @@ const storageKeys = {
   fontWeight: "ascendchan-font-weight",
   fontSize: "ascendchan-font-size",
   spamState: "ascendchan-spam-state",
+  threadScroll: "ascendchan-thread-scroll",
 };
 
 const defaultPrefs = { theme: "classic-olive", font: "georgia", fontWeight: "regular", fontSize: 100 };
@@ -32,6 +33,8 @@ let currentThread = null;
 let realtimeChannel = null;
 let realtimeThreadId = null;
 let refreshTimer = null;
+let scrollSaveTimer = null;
+let hasRestoredScroll = false;
 
 function loadPreferences() {
   return {
@@ -116,6 +119,52 @@ function enforceSpamCooldown() {
 function getParams() {
   const params = new URLSearchParams(window.location.search);
   return { board: params.get("board") || "mind", thread: Number(params.get("thread")) };
+}
+
+function getThreadScrollKey() {
+  const { board, thread } = getParams();
+  return `${storageKeys.threadScroll}:${board}:${thread}`;
+}
+
+function saveThreadScrollPosition() {
+  const posts = Array.from(document.querySelectorAll('[id^="p-"]'));
+  if (!posts.length) return;
+  const anchorPost = posts.find((post) => post.getBoundingClientRect().top >= 0) || posts[posts.length - 1];
+  if (!anchorPost?.id) return;
+  const payload = {
+    postId: anchorPost.id,
+    offset: Math.round(anchorPost.getBoundingClientRect().top),
+    scrollY: Math.round(window.scrollY),
+  };
+  sessionStorage.setItem(getThreadScrollKey(), JSON.stringify(payload));
+}
+
+function scheduleScrollSave() {
+  window.clearTimeout(scrollSaveTimer);
+  scrollSaveTimer = window.setTimeout(() => {
+    scrollSaveTimer = null;
+    saveThreadScrollPosition();
+  }, 120);
+}
+
+function restoreThreadScrollPosition() {
+  if (hasRestoredScroll || window.location.hash) return;
+  const raw = sessionStorage.getItem(getThreadScrollKey());
+  if (!raw) return;
+  try {
+    const saved = JSON.parse(raw);
+    const anchor = saved?.postId ? document.getElementById(saved.postId) : null;
+    if (anchor) {
+      const top = anchor.getBoundingClientRect().top + window.scrollY - Number(saved.offset || 0);
+      window.scrollTo({ top: Math.max(0, top), behavior: "auto" });
+      hasRestoredScroll = true;
+      return;
+    }
+    if (Number.isFinite(saved?.scrollY)) {
+      window.scrollTo({ top: Math.max(0, saved.scrollY), behavior: "auto" });
+      hasRestoredScroll = true;
+    }
+  } catch {}
 }
 
 function escapeHtml(text) {
@@ -427,6 +476,7 @@ async function renderThreadPage() {
   `;
 
   setupThreadRealtime(threadData);
+  restoreThreadScrollPosition();
 }
 
 function scheduleRefresh(delay = 200) {
@@ -662,8 +712,11 @@ renderThreadPage().catch(() => {
   threadPagePanel.innerHTML = '<p class="empty-state">Could not load thread.</p>';
 });
 window.setInterval(syncCooldownUi, 1000);
+window.addEventListener("scroll", scheduleScrollSave, { passive: true });
+window.addEventListener("pagehide", saveThreadScrollPosition);
 
 window.addEventListener("beforeunload", () => {
+  saveThreadScrollPosition();
   if (realtimeChannel) {
     window.AscendSupabase.removeChannel(realtimeChannel);
   }
