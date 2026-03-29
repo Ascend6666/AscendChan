@@ -25,23 +25,28 @@ The goal was to keep it simple, minimal and comfy place to interact.
 
 Create a Supabase project, then run the SQL from `supabase_schema.sql`.
 
-### 2. Add your local config
+### 2. Review the public config
 
-Copy `local-config.example.js` to `local-config.js` and fill in your own values:
+The site now uses `public-config.js` for safe frontend values like the Supabase project URL and anon key.
+
+Those values are expected to be public in a browser app and should be protected by proper Supabase Row Level Security.
+
+### 3. Add your local-only config
+
+Copy `local-config.example.js` to `local-config.js` and fill in your own local-only values:
 
 ```js
-window.AscendConfig = {
-  supabaseUrl: "https://your-project-ref.supabase.co",
-  supabaseAnonKey: "your-public-anon-key",
+window.AscendLocalConfig = {
   adminPasswords: {
     admin: "choose-a-local-admin-password",
+    developer: "choose-a-local-developer-password",
   },
 };
 ```
 
-`local-config.js` is gitignored, so it is limited to local testing.
+`local-config.js` is gitignored, so it stays on your machine.
 
-### 3. Serve the files
+### 4. Serve the files
 
 This is a static project, so any simple local server will do. Personally, I use git bash :
 
@@ -69,7 +74,7 @@ Then check on which port the site is hosted then open `http://localhost:port`.
 
 This repo is safe to publish now, but it is still important to be honest about what this project is.
 
-The admin password flow is only a local browser-side convenience. It is not real authentication. If you want real moderation or roleplay :), that needs to be handled properly on the backend and through stricter Supabase policies.
+The admin password flow is only a local browser-side convenience. It is not real authentication. If you publish a `local-config.js` file on a public static site, anyone can fetch it. Real moderation needs backend or Supabase-auth-based authorization with stricter policies.
 
 Before deploying this publicly, review and harden the policies in `supabase_schema.sql`.
 

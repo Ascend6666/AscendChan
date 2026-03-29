@@ -7,7 +7,7 @@ const storageKeys = {
 };
 
 const defaultPrefs = { theme: "classic-olive", font: "tahoma", fontWeight: "regular", fontSize: 100 };
-const adminPasswords = window.AscendConfig?.adminPasswords || {};
+const adminPasswords = window.AscendLocalConfig?.adminPasswords || {};
 
 const body = document.body;
 const customizePanel = document.getElementById("customizePanel");
@@ -154,7 +154,7 @@ loginToggle.addEventListener("click", () => {
     return;
   }
   if (!adminPasswords.admin && !adminPasswords.developer) {
-    loginStatus.textContent = "Login is disabled in the public repo. Add local-config.js to enable local-only roles.";
+    loginStatus.textContent = "Admin login is disabled here. Local-only passwords can be loaded from local-config.js.";
   } else {
     loginStatus.textContent = "Use developer or admin password to unlock moderation tools.";
   }
@@ -196,7 +196,7 @@ loginForm.addEventListener("submit", (event) => {
   if (adminPasswords.admin && password === adminPasswords.admin) return unlockDashboard("admin");
   if (adminPasswords.developer && password === adminPasswords.developer) return unlockDashboard("developer");
   if (!adminPasswords.admin && !adminPasswords.developer) {
-    loginStatus.textContent = "Login is disabled until local-config.js is added.";
+    loginStatus.textContent = "Admin login is disabled until local-config.js is added locally.";
     return;
   }
   loginStatus.textContent = "Password rejected.";

@@ -6,7 +6,7 @@ if (!window.supabase || typeof window.supabase.createClient !== "function") {
   console.error("Supabase client library failed to load.");
   window.AscendSupabase = null;
 } else if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn("Missing Supabase config. Create local-config.js from local-config.example.js.");
+  console.warn("Missing Supabase config. Check public-config.js.");
   window.AscendSupabase = null;
 } else {
   window.AscendSupabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
