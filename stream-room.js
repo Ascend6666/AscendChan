@@ -20,7 +20,7 @@ const storageKeys = {
   fontSize: "ascendchan-font-size",
 };
 
-const defaultPrefs = { theme: "classic-olive", font: "georgia", fontWeight: "regular", fontSize: 100 };
+const defaultPrefs = { theme: "classic-olive", font: "tahoma", fontWeight: "regular", fontSize: 100 };
 const body = document.body;
 
 let streamData = null;
