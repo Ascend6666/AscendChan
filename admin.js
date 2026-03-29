@@ -8,7 +8,7 @@ const storageKeys = {
 
 const defaultPrefs = {
   theme: "classic-olive",
-  font: "tahoma",
+  font: "georgia",
   fontWeight: "regular",
   fontSize: 100,
 };

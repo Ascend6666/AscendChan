@@ -6,7 +6,7 @@ const storageKeys = {
   spamState: "ascendchan-spam-state",
 };
 
-const defaultPrefs = { theme: "classic-olive", font: "tahoma", fontWeight: "regular", fontSize: 100 };
+const defaultPrefs = { theme: "classic-olive", font: "georgia", fontWeight: "regular", fontSize: 100 };
 
 const body = document.body;
 const threadPageBoard = document.getElementById("threadPageBoard");

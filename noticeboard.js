@@ -6,7 +6,7 @@ const storageKeys = {
   role: "ascendchan-role",
 };
 
-const defaultPrefs = { theme: "classic-olive", font: "tahoma", fontWeight: "regular", fontSize: 100 };
+const defaultPrefs = { theme: "classic-olive", font: "georgia", fontWeight: "regular", fontSize: 100 };
 const body = document.body;
 const noticeboardDisplay = document.getElementById("noticeboardDisplay");
 const noticeboardEditor = document.getElementById("noticeboardEditor");
