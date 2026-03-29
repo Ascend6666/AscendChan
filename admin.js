@@ -504,6 +504,7 @@ document.querySelectorAll("[data-close-panel]").forEach((button) => {
 });
 
 adminLogoutButton.addEventListener("click", () => {
+  sessionStorage.removeItem(storageKeys.role);
   localStorage.removeItem(storageKeys.role);
   window.location.href = "index.html";
 });

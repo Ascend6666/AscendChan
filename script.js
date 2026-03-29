@@ -208,8 +208,6 @@ logoutButton.addEventListener("click", () => {
   syncSavedLoginState();
 });
 
-sessionStorage.removeItem(storageKeys.role);
-localStorage.removeItem(storageKeys.role);
 applyPreferences(draftPrefs);
 syncSavedLoginState();
 renderNoticeboard();
