@@ -52,19 +52,17 @@ The basic flow is:
 
 The frontend checks your signed-in account and only unlocks the admin panel when that stored role is `admin`.
 
-If you want a place for local-only notes or future machine-specific overrides, copy `local-config.example.js` to `local-config.js`. That file should stay private and uncommitted.
+`local-config.js` is optional. If you want a place for local-only notes or future machine-specific overrides, copy `local-config.example.js` to `local-config.js`. Keep that file private and uncommitted.
 
 ### 4. Serve the files
 
-This is a static project, so any simple local server will do. Personally, I use git bash:
+This is a static project, so any simple local server will do. For example:
 
-```git bash
-cd Project //Locate the project
-npm install //Install the dependencies
-npm run dev //Run the project locally
+```powershell
+python -m http.server 8000
 ```
 
-Then check on which port the site is hosted then open `http://localhost:port`.
+Then open `http://localhost:8000`.
 
 ## Project files
 
