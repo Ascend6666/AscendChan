@@ -313,7 +313,13 @@ function formatTimestamp(value) {
   if (!value) return "";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "";
-  return date.toLocaleString();
+  return date.toLocaleString([], {
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
 }
 
 function renderMetaLabel(role, alias, createdAt) {
