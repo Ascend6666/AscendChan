@@ -1110,6 +1110,12 @@ body[data-theme="minimal-dark"] .todo-progress.is-complete .todo-progress-bar {
   justify-content: flex-start;
 }
 
+.post-timestamp {
+  color: var(--muted);
+  font-size: calc(9px * var(--content-font-scale));
+  white-space: nowrap;
+}
+
 body[data-theme="amber-noir"] .post-alias,
 body[data-theme="retro-terminal"] .post-alias {
   background: color-mix(in srgb, #cfa24b 18%, var(--panel-2) 82%);

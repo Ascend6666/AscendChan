@@ -309,13 +309,22 @@ function renderAliasLabel(alias) {
   return `<span class="post-alias" aria-label="alias">${escapeHtml(formatted)}</span>`;
 }
 
-function renderMetaLabel(role, alias) {
+function formatTimestamp(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleString();
+}
+
+function renderMetaLabel(role, alias, createdAt) {
+  const timestamp = formatTimestamp(createdAt);
+  const timestampMarkup = timestamp ? `<span class="post-timestamp">${escapeHtml(timestamp)}</span>` : "";
   if (role === "admin") {
-    return `<span class="post-meta-labels"><span class="thread-no">Admin</span></span>`;
+    return `<span class="post-meta-labels"><span class="thread-no">Admin</span>${timestampMarkup}</span>`;
   }
   const aliasLabel = alias ? renderAliasLabel(alias) : "";
-  if (aliasLabel) {
-    return `<span class="post-meta-labels">${aliasLabel}</span>`;
+  if (aliasLabel || timestampMarkup) {
+    return `<span class="post-meta-labels">${aliasLabel}${timestampMarkup}</span>`;
   }
   return "";
 }
@@ -377,7 +386,7 @@ async function renderThreadPage() {
     <div class="thread-list">
       <article class="thread-card thread-card-op" id="p-${threadData.opPostId}">
         <div class="thread-card-head">
-          ${renderMetaLabel(threadData.author_role, threadData.poster_alias)}
+          ${renderMetaLabel(threadData.author_role, threadData.poster_alias, threadData.created_at)}
           <div class="post-actions">
             ${postMenuMarkup(threadData.opPostId, threadData.poster_client_id)}
             <button class="reply-inline-button" type="button" data-reply-target="${threadData.opPostId}">Reply</button>
@@ -394,7 +403,7 @@ async function renderThreadPage() {
       ${threadData.replies.length ? threadData.replies.map((reply) => `
         <article class="thread-card" id="p-${reply.postId}">
           <div class="thread-card-head">
-            ${renderMetaLabel(reply.author_role, reply.poster_alias)}
+            ${renderMetaLabel(reply.author_role, reply.poster_alias, reply.created_at)}
             <div class="post-actions">
               ${postMenuMarkup(reply.postId, reply.poster_client_id)}
               <button class="reply-inline-button" type="button" data-reply-target="${reply.postId}">Reply</button>
