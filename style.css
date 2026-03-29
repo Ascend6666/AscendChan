@@ -1479,6 +1479,60 @@ input[type="range"] {
   font-weight: 400;
 }
 
+.donate-intro p {
+  margin: 0;
+}
+
+.donate-privacy-note {
+  color: var(--muted);
+}
+
+.donation-grid {
+  padding: 7px 8px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.donation-card {
+  padding: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.donation-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.donation-meta,
+.donation-note {
+  margin: 0;
+  color: var(--muted);
+}
+
+.donation-badge {
+  border: 1px solid var(--line);
+  background: var(--panel-2);
+  color: var(--accent);
+  padding: 3px 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: lowercase;
+}
+
+.donation-address-wrap {
+  margin-top: 0;
+}
+
+.donation-address-wrap textarea {
+  min-height: 84px;
+  font-family: "Courier New", Courier, monospace;
+  overflow-wrap: anywhere;
+}
+
 .close-button {
   min-width: 36px;
   text-transform: uppercase;

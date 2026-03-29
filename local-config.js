@@ -5,4 +5,19 @@ window.AscendConfig = {
     admin: "sarthak@ascend666",
     developer: "ascend-dev",
   },
+  donations: [
+    {
+      label: "Monero",
+      network: "XMR",
+      address: "add-your-monero-address-here",
+      note: "Best choice if you want the most privacy.",
+      recommended: true,
+    },
+    {
+      label: "Bitcoin",
+      network: "BTC",
+      address: "add-your-bitcoin-address-here",
+      note: "Use a fresh address if privacy matters.",
+    },
+  ],
 };
