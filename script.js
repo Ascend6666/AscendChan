@@ -7,7 +7,7 @@ const storageKeys = {
 };
 
 const defaultPrefs = { theme: "classic-olive", font: "tahoma", fontWeight: "regular", fontSize: 100 };
-const adminPasswords = { admin: "sarthak@ascend666", developer: "ascend-dev" };
+const adminPasswords = window.AscendConfig?.adminPasswords || {};
 
 const body = document.body;
 const customizePanel = document.getElementById("customizePanel");
@@ -152,7 +152,11 @@ loginToggle.addEventListener("click", () => {
     openPanel(dashboardPanel);
     return;
   }
-  loginStatus.textContent = "Use developer or admin password to unlock moderation tools.";
+  if (!adminPasswords.admin && !adminPasswords.developer) {
+    loginStatus.textContent = "Login is disabled in the public repo. Add local-config.js to enable local-only roles.";
+  } else {
+    loginStatus.textContent = "Use developer or admin password to unlock moderation tools.";
+  }
   passwordInput.value = "";
   openPanel(loginPanel);
 });
@@ -188,8 +192,12 @@ document.querySelectorAll("[data-close-panel]").forEach((button) => {
 loginForm.addEventListener("submit", (event) => {
   event.preventDefault();
   const password = passwordInput.value.trim();
-  if (password === adminPasswords.admin) return unlockDashboard("admin");
-  if (password === adminPasswords.developer) return unlockDashboard("developer");
+  if (adminPasswords.admin && password === adminPasswords.admin) return unlockDashboard("admin");
+  if (adminPasswords.developer && password === adminPasswords.developer) return unlockDashboard("developer");
+  if (!adminPasswords.admin && !adminPasswords.developer) {
+    loginStatus.textContent = "Login is disabled until local-config.js is added.";
+    return;
+  }
   loginStatus.textContent = "Password rejected.";
 });
 logoutButton.addEventListener("click", () => {
